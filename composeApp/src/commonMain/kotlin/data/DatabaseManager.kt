@@ -47,6 +47,34 @@ class DatabaseManager(private val driver: SqlDriver) {
         )
     }
 
+    suspend fun updatePoem(
+        id: Long,
+        title: String,
+        content: String,
+        author: String,
+        dynasty: String?,
+        category: String,
+        notes: String?,
+        isFavorite: Boolean
+    ) {
+        val currentTime = System.currentTimeMillis()
+        poemQueries.updatePoetry(
+            id = id,
+            title = title,
+            content = content,
+            author = author,
+            dynasty = dynasty,
+            category = category,
+            update_time = currentTime,
+            notes = notes,
+            is_favorite = if (isFavorite) 1L else 0L
+        )
+    }
+
+    suspend fun deletePoem(id: Long) {
+        poemQueries.deletePoetry(id)
+    }
+
     // 标签相关操作
     fun getTagsForPoem(poemId: Long): Flow<List<Tag_entity>> =
         tagQueries.getTagsForPoetry(poemId)
@@ -63,4 +91,9 @@ class DatabaseManager(private val driver: SqlDriver) {
             tagQueries.addTagToPoetry(poemId, tagId)
         }
     }
+
+    fun getFavoritePoems(): Flow<List<Poem_entity>> =
+        poemQueries.selectFavorites()
+            .asFlow()
+            .mapToList(Dispatchers.IO)
 } 

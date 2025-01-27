@@ -30,10 +30,39 @@ class PoemRepository(private val databaseManager: DatabaseManager) {
         )
     }
 
+    suspend fun updatePoem(
+        id: Long,
+        title: String,
+        content: String,
+        author: String,
+        dynasty: String?,
+        category: String,
+        notes: String?,
+        isFavorite: Boolean = false
+    ) {
+        databaseManager.updatePoem(
+            id = id,
+            title = title,
+            content = content,
+            author = author,
+            dynasty = dynasty,
+            category = category,
+            notes = notes,
+            isFavorite = isFavorite
+        )
+    }
+
+    suspend fun deletePoem(id: Long) {
+        databaseManager.deletePoem(id)
+    }
+
     fun getTagsForPoem(poemId: Long): Flow<List<TagEntity>> =
         databaseManager.getTagsForPoem(poemId)
 
     suspend fun addTagToPoem(poemId: Long, tagName: String) {
         databaseManager.addTagToPoem(poemId, tagName)
     }
+
+    suspend fun getFavoritePoems(): Flow<List<PoemEntity>> =
+        databaseManager.getFavoritePoems()
 } 
