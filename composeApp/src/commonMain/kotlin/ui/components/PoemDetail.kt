@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import data.db.Poem_entity
 
@@ -20,40 +21,55 @@ fun PoemDetail(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(16.dp)  // 减小外边距，让内容区域更大
     ) {
         // 标题栏
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),  // 增加底部间距
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = poem.title,
-                style = MaterialTheme.typography.h4
-            )
+            // 标题容器，使用权重让它自适应宽度
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 16.dp)  // 与收藏按钮保持间距
+            ) {
+                Text(
+                    text = poem.title,
+                    style = MaterialTheme.typography.h4,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             
-            // 更大的收藏按钮
+            // 收藏按钮，固定尺寸
             IconButton(
                 onClick = onFavoriteClick,
-                modifier = Modifier.size(48.dp)  // 增大按钮尺寸
+                modifier = Modifier
+                    .size(56.dp)  // 增大按钮的基础尺寸
+                    .padding(4.dp)  // 内边距，让点击区域更大
             ) {
                 Icon(
                     imageVector = if (poem.is_favorite > 0) Icons.Default.Favorite 
                                  else Icons.Default.FavoriteBorder,
-                    contentDescription = "收藏",
+                    contentDescription = if (poem.is_favorite > 0) "取消收藏" else "收藏",
                     tint = if (poem.is_favorite > 0) MaterialTheme.colors.primary 
                           else MaterialTheme.colors.onSurface,
-                    modifier = Modifier.size(32.dp)  // 增大图标尺寸
+                    modifier = Modifier
+                        .size(36.dp)  // 增大图标尺寸
+                        .padding(2.dp)  // 图标内边距
                 )
             }
         }
         
-        Spacer(modifier = Modifier.height(16.dp))
-        
         // 作者信息
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),  // 增加底部间距
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -69,16 +85,14 @@ fun PoemDetail(
             }
         }
         
-        Spacer(modifier = Modifier.height(32.dp))
-        
         // 诗词内容
         Text(
             text = poem.content,
             style = MaterialTheme.typography.body1,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)  // 增加底部间距
         )
-        
-        Spacer(modifier = Modifier.height(24.dp))
         
         // 注释
         poem.notes?.let { notes ->
@@ -86,9 +100,9 @@ fun PoemDetail(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "注释：",
-                style = MaterialTheme.typography.subtitle2
+                style = MaterialTheme.typography.subtitle2,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = notes,
                 style = MaterialTheme.typography.body2,

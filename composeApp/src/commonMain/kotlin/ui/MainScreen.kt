@@ -39,14 +39,13 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
                     Screen.Home -> HomeScreen(
                         viewModel = remember { viewModelFactory.createHomeViewModel() }
                     )
-                    // Screen.Favorites -> FavoritesScreen(
-                    //     viewModel = remember { viewModelFactory.createFavoritesViewModel() }
-                    // )
+                    Screen.Favorites -> FavoritesScreen(
+                        viewModel = remember { viewModelFactory.createFavoritesViewModel() }
+                    )
                     // Screen.Categories -> CategoriesScreen()
                     // Screen.Tags -> TagsScreen()
                     // Screen.Settings -> SettingsScreen()
                     Screen.Categories -> TODO()
-                    Screen.Favorites -> TODO()
                     Screen.Settings -> TODO()
                     Screen.Tags -> TODO()
                 }
