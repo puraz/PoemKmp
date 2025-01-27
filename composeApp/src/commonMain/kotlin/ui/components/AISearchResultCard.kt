@@ -64,8 +64,11 @@ fun AISearchResultCard(
                     )
                 }
                 
-                IconButton(onClick = onAddToSystem) {
-                    Icon(
+                IconButton(
+                    onClick = onAddToSystem,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    androidx.compose.material.Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "添加到系统",
                         tint = MaterialTheme.colors.primary

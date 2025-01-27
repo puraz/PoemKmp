@@ -86,8 +86,13 @@ class AISearchViewModel(
                     category = poem.category,
                     notes = poem.notes
                 )
+                
+                // 刷新搜索结果，移除已添加的诗词
+                _searchResults.value = _searchResults.value.filter { it != aiResult }
+                
             } catch (e: Exception) {
-                // 处理错误
+                // TODO: 处理错误，可以添加错误提示
+                println("添加诗词失败: ${e.message}")
             }
         }
     }
