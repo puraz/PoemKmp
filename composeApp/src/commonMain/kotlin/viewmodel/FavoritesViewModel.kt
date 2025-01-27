@@ -16,18 +16,22 @@ class FavoritesViewModel(
     private val _selectedPoem = mutableStateOf<Poem_entity?>(null)
     val selectedPoem: State<Poem_entity?> = _selectedPoem.asState()
 
+    private val _isLoading = mutableStateOf(true)
+    val isLoading: State<Boolean> = _isLoading.asState()
+
     init {
         loadFavorites()
     }
 
     private fun loadFavorites() {
         viewModelScope.launch {
+            _isLoading.value = true
             repository.getFavoritePoems().collectLatest { poems ->
                 _favoritePoems.value = poems
-                // 更新选中诗词的状态
                 _selectedPoem.value?.let { selected ->
                     _selectedPoem.value = poems.find { it.id == selected.id }
                 }
+                _isLoading.value = false
             }
         }
     }

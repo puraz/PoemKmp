@@ -48,29 +48,29 @@ fun NavigationDrawerContent(
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        NavigationItem(
-            icon = Icons.Default.Menu,
-            label = "分类",
-            selected = currentScreen is Screen.Categories,
-            onClick = { onScreenSelected(Screen.Categories) }
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        NavigationItem(
-            icon = Icons.Default.AccountBox,
-            label = "标签",
-            selected = currentScreen is Screen.Tags,
-            onClick = { onScreenSelected(Screen.Tags) }
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        NavigationItem(
-            icon = Icons.Default.Settings,
-            label = "设置",
-            selected = currentScreen is Screen.Settings,
-            onClick = { onScreenSelected(Screen.Settings) }
-        )
+        // NavigationItem(
+        //     icon = Icons.Default.Menu,
+        //     label = "分类",
+        //     selected = currentScreen is Screen.Categories,
+        //     onClick = { onScreenSelected(Screen.Categories) }
+        // )
+        //
+        // Spacer(modifier = Modifier.height(8.dp))
+        //
+        // NavigationItem(
+        //     icon = Icons.Default.AccountBox,
+        //     label = "标签",
+        //     selected = currentScreen is Screen.Tags,
+        //     onClick = { onScreenSelected(Screen.Tags) }
+        // )
+        //
+        // Spacer(modifier = Modifier.height(8.dp))
+        //
+        // NavigationItem(
+        //     icon = Icons.Default.Settings,
+        //     label = "设置",
+        //     selected = currentScreen is Screen.Settings,
+        //     onClick = { onScreenSelected(Screen.Settings) }
+        // )
     }
 }
