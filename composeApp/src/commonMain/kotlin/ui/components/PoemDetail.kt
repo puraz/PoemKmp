@@ -33,13 +33,18 @@ fun PoemDetail(
                 style = MaterialTheme.typography.h4
             )
             
-            IconButton(onClick = onFavoriteClick) {
+            // 更大的收藏按钮
+            IconButton(
+                onClick = onFavoriteClick,
+                modifier = Modifier.size(48.dp)  // 增大按钮尺寸
+            ) {
                 Icon(
                     imageVector = if (poem.is_favorite > 0) Icons.Default.Favorite 
                                  else Icons.Default.FavoriteBorder,
                     contentDescription = "收藏",
                     tint = if (poem.is_favorite > 0) MaterialTheme.colors.primary 
-                          else MaterialTheme.colors.onSurface
+                          else MaterialTheme.colors.onSurface,
+                    modifier = Modifier.size(32.dp)  // 增大图标尺寸
                 )
             }
         }

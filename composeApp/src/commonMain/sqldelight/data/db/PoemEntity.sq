@@ -71,4 +71,10 @@ WHERE id = ?;
 -- 删除诗词
 deletePoetry:
 DELETE FROM poem_entity
+WHERE id = ?;
+
+-- 更新收藏状态
+updateFavoriteStatus:
+UPDATE poem_entity
+SET is_favorite = ?, update_time = ?
 WHERE id = ?; 

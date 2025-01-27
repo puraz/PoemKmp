@@ -31,6 +31,9 @@ class HomeViewModel(
         viewModelScope.launch {
             repository.getAllPoems().collectLatest { poemList ->
                 _poems.value = poemList
+                _selectedPoem.value?.let { selected ->
+                    _selectedPoem.value = poemList.find { it.id == selected.id }
+                }
             }
         }
     }
@@ -91,16 +94,20 @@ class HomeViewModel(
     }
 
     fun toggleFavorite(poem: Poem_entity) {
+        val updatedPoem = poem.copy(
+            is_favorite = if (poem.is_favorite == 0L) 1L else 0L
+        )
+        
+        _selectedPoem.value = updatedPoem
+        
+        _poems.value = _poems.value.map { 
+            if (it.id == poem.id) updatedPoem else it 
+        }
+        
         viewModelScope.launch {
-            repository.updatePoem(
+            repository.toggleFavorite(
                 id = poem.id,
-                title = poem.title,
-                content = poem.content,
-                author = poem.author,
-                dynasty = poem.dynasty,
-                category = poem.category,
-                notes = poem.notes,
-                isFavorite = poem.is_favorite == 0L
+                isFavorite = updatedPoem.is_favorite == 1L
             )
         }
     }

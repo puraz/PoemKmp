@@ -65,4 +65,8 @@ class PoemRepository(private val databaseManager: DatabaseManager) {
 
     suspend fun getFavoritePoems(): Flow<List<PoemEntity>> =
         databaseManager.getFavoritePoems()
+
+    suspend fun toggleFavorite(id: Long, isFavorite: Boolean) {
+        databaseManager.toggleFavorite(id, isFavorite)
+    }
 } 

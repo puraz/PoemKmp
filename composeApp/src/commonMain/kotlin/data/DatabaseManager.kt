@@ -96,4 +96,13 @@ class DatabaseManager(private val driver: SqlDriver) {
         poemQueries.selectFavorites()
             .asFlow()
             .mapToList(Dispatchers.IO)
+
+    suspend fun toggleFavorite(id: Long, isFavorite: Boolean) {
+        val currentTime = System.currentTimeMillis()
+        poemQueries.updateFavoriteStatus(
+            is_favorite = if (isFavorite) 1L else 0L,
+            update_time = currentTime,
+            id = id
+        )
+    }
 } 
