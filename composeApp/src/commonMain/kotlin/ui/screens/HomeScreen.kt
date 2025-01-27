@@ -6,36 +6,25 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import data.PoemRepository
-import data.db.Poem_entity
 import kotlinx.coroutines.flow.Flow
 import ui.components.PoemDetail
 import ui.components.PoemListItem
-import ui.components.SearchBar
+import viewmodel.HomeViewModel
 
 @Composable
-fun HomeScreen(repository: PoemRepository) {
-    var searchText by remember { mutableStateOf("") }
-    var selectedPoem by remember { mutableStateOf<Poem_entity?>(null) }
-    
-    val poems = repository.getAllPoems().collectAsState(initial = emptyList())
-    
+fun HomeScreen(viewModel: HomeViewModel) {
     Row(modifier = Modifier.fillMaxSize()) {
         // 诗词列表
         Column(
             modifier = Modifier.weight(0.4f)
                 .fillMaxHeight()
+                .padding(top = 16.dp)  // 添加顶部间距
         ) {
-            // SearchBar(
-            //     value = searchText,
-            //     onValueChange = { searchText = it },
-            //     modifier = Modifier.padding(vertical = 16.dp)
-            // )
             LazyColumn {
-                items(poems.value) { poem ->
+                items(viewModel.poems.value) { poem ->
                     PoemListItem(
                         poem = poem,
-                        onClick = { selectedPoem = poem }
+                        onClick = { viewModel.onPoemSelected(poem) }
                     )
                 }
             }
@@ -46,12 +35,10 @@ fun HomeScreen(repository: PoemRepository) {
             modifier = Modifier.weight(0.6f)
                 .fillMaxHeight()
         ) {
-            selectedPoem?.let { poem ->
+            viewModel.selectedPoem.value?.let { poem ->
                 PoemDetail(
                     poem = poem,
-                    onFavoriteClick = {
-                        // TODO: 实现收藏功能
-                    }
+                    onFavoriteClick = { viewModel.toggleFavorite(poem) }
                 )
             }
         }
