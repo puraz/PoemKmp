@@ -1,0 +1,74 @@
+CREATE TABLE poem_entity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    author TEXT NOT NULL,
+    dynasty TEXT,
+    category TEXT NOT NULL,
+    create_time INTEGER NOT NULL,
+    update_time INTEGER NOT NULL,
+    notes TEXT,
+    is_favorite INTEGER NOT NULL DEFAULT 0
+);
+
+-- 查询所有诗词
+selectAll:
+SELECT *
+FROM poem_entity
+ORDER BY create_time DESC;
+
+-- 按ID查询
+selectById:
+SELECT *
+FROM poem_entity
+WHERE id = ?;
+
+-- 按标题搜索
+searchByTitle:
+SELECT *
+FROM poem_entity
+WHERE title LIKE '%' || ? || '%';
+
+-- 查询收藏
+selectFavorites:
+SELECT *
+FROM poem_entity
+WHERE is_favorite = 1;
+
+-- 按分类查询
+selectByCategory:
+SELECT *
+FROM poem_entity
+WHERE category = ?;
+
+-- 插入诗词
+insertPoetry:
+INSERT INTO poem_entity(
+    title,
+    content,
+    author,
+    dynasty,
+    category,
+    create_time,
+    update_time,
+    notes,
+    is_favorite
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- 更新诗词
+updatePoetry:
+UPDATE poem_entity
+SET title = ?,
+    content = ?,
+    author = ?,
+    dynasty = ?,
+    category = ?,
+    update_time = ?,
+    notes = ?,
+    is_favorite = ?
+WHERE id = ?;
+
+-- 删除诗词
+deletePoetry:
+DELETE FROM poem_entity
+WHERE id = ?; 
