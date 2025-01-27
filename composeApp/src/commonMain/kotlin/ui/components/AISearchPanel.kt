@@ -37,7 +37,7 @@ fun AISearchPanel(
                     value = searchText,
                     onValueChange = { 
                         searchText = it
-                        viewModel.semanticSearch(it)
+                        viewModel.searchOutsideSystem(it)
                     },
                     label = { Text("AI 语义搜索") },
                     placeholder = { Text("例如：描写思乡的诗词、关于春天的诗...") },
@@ -153,75 +153,3 @@ fun AISearchPanel(
     }
 }
 
-@Composable
-private fun AISearchResultCard(
-    result: AISearchResult,
-    onAddToSystem: () -> Unit,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        elevation = 2.dp
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            // 标题和作者
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = result.title,
-                        style = MaterialTheme.typography.h6
-                    )
-                    Text(
-                        text = "${result.author} ${result.dynasty ?: ""}",
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                    )
-                }
-                
-                IconButton(onClick = onAddToSystem) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "添加到系统",
-                        tint = MaterialTheme.colors.primary
-                    )
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // 诗词内容
-            Text(
-                text = result.content,
-                style = MaterialTheme.typography.body1,
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // 匹配原因
-            Text(
-                text = "匹配原因：${result.matchReason}",
-                style = MaterialTheme.typography.caption,
-                color = MaterialTheme.colors.primary
-            )
-            
-            // 相关度
-            LinearProgressIndicator(
-                progress = result.relevanceScore.toFloat(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-            )
-        }
-    }
-} 

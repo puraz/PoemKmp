@@ -30,10 +30,6 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
                     currentScreen = currentScreen,
                     onScreenSelected = { currentScreen = it },
                     aiSearchViewModel = aiSearchViewModel,
-                    onPoemSelected = { poem ->
-                        homeViewModel.onPoemSelected(poem)
-                    },
-                    searchViewModel = remember { viewModelFactory.createSearchViewModel() }
                 )
             }
             
@@ -44,7 +40,8 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
             ) {
                 when (currentScreen) {
                     Screen.Home -> HomeScreen(
-                        viewModel = homeViewModel
+                        homeViewModel = homeViewModel,
+                        aiSearchViewModel = aiSearchViewModel
                     )
                     Screen.Favorites -> FavoritesScreen(
                         viewModel = remember { viewModelFactory.createFavoritesViewModel() }

@@ -19,7 +19,8 @@ data class AISearchResult(
     val category: String?,
     val notes: String?,
     val relevanceScore: Double,
-    val matchReason: String
+    val matchReason: String,
+    val isRecommendation: Boolean = false
 )
 
 data class PoemAnalysis(

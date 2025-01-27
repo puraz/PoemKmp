@@ -106,30 +106,58 @@ class DeepSeekAIService(
         poems: List<Poem_entity>
     ): List<AISearchResult> {
         val systemPrompt = """
-        作为一个专业的诗词搜索助手，请根据用户的查询意图，从给定的诗词中找出最相关的结果。
+        作为一个专业的诗词搜索助手，你有两个主要任务：
+        1. 如果提供了诗词列表，从中找出与查询意图最相关的结果。
+        2. 如果没有提供诗词列表或列表为空，请根据查询意图推荐合适的诗词（从你的知识库中）。
+
         请以JSON格式返回结果，包含以下字段：
         - title: 诗词标题
         - author: 作者
         - dynasty: 朝代
         - content: 内容
         - relevance_score: 相关度评分 (0-1)
-        - match_reason: 匹配原因
-        请返回一个JSON数组，包含所有匹配的结果。
+        - match_reason: 匹配原因或推荐理由
+        - is_recommendation: 是否为推荐诗词（true/false）
+
+        请将结果包装在 results 数组中。
         """.trimIndent()
 
-        val userPrompt = """
-        查询意图：$query
-        
-        诗词列表：
-        ${poems.joinToString("\n\n") { 
+        val userPrompt = if (poems.isEmpty()) {
             """
-            标题：${it.title}
-            作者：${it.author}
-            朝代：${it.dynasty ?: "未知"}
-            内容：${it.content}
+            系统中暂无诗词，请根据以下查询意图推荐合适的诗词：
+            查询意图：$query
             """.trimIndent()
-        }}
-        """.trimIndent()
+        } else {
+            """
+            查询意图：$query
+            
+            诗词列表：
+            ${poems.joinToString("\n\n") { 
+                """
+                标题：${it.title}
+                作者：${it.author}
+                朝代：${it.dynasty ?: "未知"}
+                内容：${it.content}
+                """.trimIndent()
+            }}
+            """.trimIndent()
+        }
+
+        @Serializable
+        data class SearchResult(
+            val title: String,
+            val author: String,
+            val dynasty: String?,
+            val content: String,
+            val relevance_score: Double,
+            val match_reason: String,
+            val is_recommendation: Boolean = false
+        )
+
+        @Serializable
+        data class SearchResponse(
+            val results: List<SearchResult>
+        )
 
         try {
             val request = ChatRequest(
@@ -169,7 +197,7 @@ class DeepSeekAIService(
             }
             
             val searchResponse = json.decodeFromString<SearchResponse>(responseContent)
-            println("找到 ${searchResponse.results.size} 个匹配结果")
+            println("找到 ${searchResponse.results.size} 个${if (poems.isEmpty()) "推荐" else "匹配"}结果")
             
             return searchResponse.results.map { result ->
                 AISearchResult(
@@ -180,7 +208,8 @@ class DeepSeekAIService(
                     category = null,
                     notes = null,
                     relevanceScore = result.relevance_score,
-                    matchReason = result.match_reason
+                    matchReason = result.match_reason,
+                    isRecommendation = result.is_recommendation
                 )
             }
         } catch (e: Exception) {

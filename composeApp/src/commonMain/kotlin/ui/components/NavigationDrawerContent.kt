@@ -19,88 +19,72 @@ import data.db.Poem_entity
 fun NavigationDrawerContent(
     currentScreen: Screen,
     onScreenSelected: (Screen) -> Unit,
-    searchViewModel: SearchViewModel,
     aiSearchViewModel: AISearchViewModel,
-    onPoemSelected: (Poem_entity) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var searchText by remember { mutableStateOf("") }
-    var showAISearch by remember { mutableStateOf(false) }
+    var showSearchDialog by remember { mutableStateOf(false) }
     
-    Box(modifier = modifier.fillMaxSize()) {
-        if (showAISearch) {
-            // AI 搜索面板
-            Column(modifier = Modifier.fillMaxSize()) {
-                // 顶部栏
-                TopAppBar(
-                    title = { Text("AI 智能搜索") },
-                    navigationIcon = {
-                        IconButton(onClick = { showAISearch = false }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "返回"
-                            )
-                        }
-                    },
-                    backgroundColor = MaterialTheme.colors.surface,
-                    elevation = 0.dp
-                )
-                
-                // AI 搜索面板
-                AISearchPanel(
-                    viewModel = aiSearchViewModel,
-                    onPoemSelected = { poem ->
-                        onPoemSelected(poem)
-                        showAISearch = false  // 选中后关闭搜索面板
-                        onScreenSelected(Screen.Home)  // 切换到首页
-                    }
-                )
-            }
-        } else {
-            // 常规导航菜单
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                // AI 搜索入口
-                Button(
-                    onClick = { showAISearch = true },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.primary
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "AI 搜索",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("AI 智能搜索")
-                }
-                
-                // 导航菜单项
-                NavigationItem(
-                    icon = Icons.Default.Home,
-                    label = "首页",
-                    selected = currentScreen is Screen.Home,
-                    onClick = { onScreenSelected(Screen.Home) }
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                NavigationItem(
-                    icon = Icons.Default.Favorite,
-                    label = "收藏夹",
-                    selected = currentScreen is Screen.Favorites,
-                    onClick = { onScreenSelected(Screen.Favorites) }
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // 发现新诗词按钮
+        Button(
+            onClick = { showSearchDialog = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.primary
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "发现新诗词",
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("发现新诗词")
         }
+        
+        // 导航菜单项
+        NavigationItem(
+            icon = Icons.Default.Home,
+            label = "首页",
+            selected = currentScreen is Screen.Home,
+            onClick = { onScreenSelected(Screen.Home) }
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        NavigationItem(
+            icon = Icons.Default.Favorite,
+            label = "收藏夹",
+            selected = currentScreen is Screen.Favorites,
+            onClick = { onScreenSelected(Screen.Favorites) }
+        )
+    }
+
+    // 搜索对话框
+    if (showSearchDialog) {
+        AlertDialog(
+            onDismissRequest = { showSearchDialog = false },
+            title = { Text("发现新诗词") },
+            text = {
+                Box(modifier = Modifier.size(800.dp, 600.dp)) {
+                    AISearchPanel(
+                        viewModel = aiSearchViewModel,
+                        onPoemSelected = { /* 暂时不需要处理 */ },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSearchDialog = false }) {
+                    Text("关闭")
+                }
+            }
+        )
     }
 }

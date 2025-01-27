@@ -19,8 +19,8 @@ class AISearchViewModel(
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading.asState()
 
-    // 语义搜索
-    fun semanticSearch(query: String) {
+    // 系统内语义搜索
+    fun searchInSystem(query: String) {
         if (query.isBlank()) {
             _searchResults.value = emptyList()
             return
@@ -29,16 +29,32 @@ class AISearchViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                // 1. 获取系统中所有诗词
                 val allPoems = poemRepository.getAllPoems().first()
-                
-                // 2. 使用 AI 进行语义搜索
                 val aiResults = aiService.semanticSearch(
                     query = query,
                     poems = allPoems
                 )
-                
-                // 3. 转换结果并排序
+                _searchResults.value = aiResults.sortedByDescending { it.relevanceScore }
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    // 系统外搜索推荐
+    fun searchOutsideSystem(query: String) {
+        if (query.isBlank()) {
+            _searchResults.value = emptyList()
+            return
+        }
+        
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val aiResults = aiService.semanticSearch(
+                    query = query,
+                    poems = emptyList()  // 传入空列表表示搜索系统外的诗词
+                )
                 _searchResults.value = aiResults.sortedByDescending { it.relevanceScore }
             } finally {
                 _isLoading.value = false
