@@ -15,6 +15,8 @@ import viewmodel.ViewModelFactory
 @Composable
 fun MainScreen(viewModelFactory: ViewModelFactory) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
+    val searchViewModel = remember { viewModelFactory.createSearchViewModel() }
+    val homeViewModel = remember { viewModelFactory.createHomeViewModel() }
     
     MaterialTheme {
         Row(modifier = Modifier.fillMaxSize()) {
@@ -26,7 +28,11 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
             ) {
                 NavigationDrawerContent(
                     currentScreen = currentScreen,
-                    onScreenSelected = { currentScreen = it }
+                    onScreenSelected = { currentScreen = it },
+                    searchViewModel = searchViewModel,
+                    onPoemSelected = { poem -> 
+                        homeViewModel.onPoemSelected(poem)
+                    }
                 )
             }
             
@@ -37,7 +43,7 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
             ) {
                 when (currentScreen) {
                     Screen.Home -> HomeScreen(
-                        viewModel = remember { viewModelFactory.createHomeViewModel() }
+                        viewModel = homeViewModel
                     )
                     Screen.Favorites -> FavoritesScreen(
                         viewModel = remember { viewModelFactory.createFavoritesViewModel() }
