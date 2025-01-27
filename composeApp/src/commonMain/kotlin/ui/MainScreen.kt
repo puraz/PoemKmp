@@ -15,30 +15,31 @@ import viewmodel.ViewModelFactory
 @Composable
 fun MainScreen(viewModelFactory: ViewModelFactory) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
-    val searchViewModel = remember { viewModelFactory.createSearchViewModel() }
     val homeViewModel = remember { viewModelFactory.createHomeViewModel() }
+    // val searchViewModel = remember { viewModelFactory.createSearchViewModel() }
+    val aiSearchViewModel = remember { viewModelFactory.createAISearchViewModel() }
     
     MaterialTheme {
         Row(modifier = Modifier.fillMaxSize()) {
-            // 左侧导航栏
             NavigationRail(
-                modifier = Modifier.width(240.dp)
+                modifier = Modifier
+                    .width(320.dp)  // 增加宽度以适应 AI 搜索面板
                     .fillMaxHeight()
-                    .background(MaterialTheme.colors.surface)
             ) {
                 NavigationDrawerContent(
                     currentScreen = currentScreen,
                     onScreenSelected = { currentScreen = it },
-                    searchViewModel = searchViewModel,
-                    onPoemSelected = { poem -> 
+                    aiSearchViewModel = aiSearchViewModel,
+                    onPoemSelected = { poem ->
                         homeViewModel.onPoemSelected(poem)
-                    }
+                    },
+                    searchViewModel = remember { viewModelFactory.createSearchViewModel() }
                 )
             }
             
-            // 主内容区
             Box(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
                     .fillMaxHeight()
             ) {
                 when (currentScreen) {
@@ -58,4 +59,4 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
             }
         }
     }
-} 
+}

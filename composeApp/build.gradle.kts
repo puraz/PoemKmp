@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    kotlin("plugin.serialization") version "1.9.0" // Use your Kotlin version
     id("app.cash.sqldelight") version "2.0.1"
 }
 
@@ -32,6 +33,14 @@ kotlin {
             
             // 协程
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+            // Ktor client
+            implementation("io.ktor:ktor-client-core:2.3.7")
+            implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+
+            // 根据平台选择合适的 HTTP 引擎
+            implementation("io.ktor:ktor-client-cio:2.3.7")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
