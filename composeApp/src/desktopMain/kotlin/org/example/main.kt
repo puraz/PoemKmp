@@ -1,5 +1,6 @@
 package org.example
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,12 +13,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import theme.ThemeManager
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
 import kotlin.system.exitProcess
 
 fun main() = application {
+    // 使用 Compose 的 isSystemInDarkTheme
+    val systemInDarkTheme = isSystemInDarkTheme()
+    
+    // 监听系统主题变化并更新 ThemeManager
+    LaunchedEffect(systemInDarkTheme) {
+        println("System is in dark theme: $systemInDarkTheme")
+        ThemeManager.setSystemDarkTheme(systemInDarkTheme)
+    }
+    
+    // 原有的窗口代码
     var apiKey by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     

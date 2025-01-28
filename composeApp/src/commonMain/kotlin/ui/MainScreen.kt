@@ -1,15 +1,18 @@
 package ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.NavigationRail
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import data.PoemRepository
+import theme.ThemeManager
 import ui.components.NavigationDrawerContent
 import ui.navigation.Screen
-import ui.screens.*
+import ui.screens.FavoritesScreen
+import ui.screens.HomeScreen
 import viewmodel.ViewModelFactory
 
 @Composable
@@ -18,8 +21,11 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
     val homeViewModel = remember { viewModelFactory.createHomeViewModel() }
     val searchViewModel = remember { viewModelFactory.createSearchViewModel() }
     val aiSearchViewModel = remember { viewModelFactory.createAISearchViewModel() }
+    val isDarkTheme = ThemeManager.isDarkTheme
     
-    MaterialTheme {
+    MaterialTheme(
+        colors = if (isDarkTheme) darkColors() else lightColors()
+    ) {
         Row(modifier = Modifier.fillMaxSize()) {
             NavigationRail(
                 modifier = Modifier

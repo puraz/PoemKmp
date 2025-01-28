@@ -14,7 +14,6 @@ class SearchViewModel(
     val searchResults: State<List<Poem_entity>> = _searchResults.asState()
 
     private val _isLoading = mutableStateOf(false)
-    val isLoading: State<Boolean> = _isLoading.asState()
 
     fun search(keyword: String) {
         if (keyword.isBlank()) {

@@ -1,10 +1,13 @@
 package ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -16,7 +19,9 @@ import viewmodel.FavoritesViewModel
 
 @Composable
 fun FavoritesScreen(viewModel: FavoritesViewModel) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    val colors = MaterialTheme.colors // 获取当前主题颜色
+
+    Box(modifier = Modifier.fillMaxSize().background(colors.background)) {
         when {
             viewModel.isLoading.value -> {
                 // 使用自定义的加载指示器

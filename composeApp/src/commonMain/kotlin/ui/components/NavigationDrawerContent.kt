@@ -65,6 +65,13 @@ fun NavigationDrawerContent(
             selected = currentScreen is Screen.Favorites,
             onClick = { onScreenSelected(Screen.Favorites) }
         )
+        
+        Spacer(modifier = Modifier.weight(1f))
+        
+        // 添加主题设置
+        Divider()
+        Spacer(modifier = Modifier.height(16.dp))
+        ThemeSettings()
     }
 
     // 搜索对话框
