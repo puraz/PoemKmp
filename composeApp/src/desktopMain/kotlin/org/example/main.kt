@@ -1,17 +1,20 @@
 package org.example
 
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
-import androidx.compose.ui.window.rememberWindowState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import java.util.Properties
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import java.io.File
 import java.io.FileInputStream
+import java.util.*
 import kotlin.system.exitProcess
 
 fun main() = application {
@@ -31,7 +34,7 @@ fun main() = application {
     
     Window(
         onCloseRequest = ::exitApplication,
-        title = "诗词鉴赏",
+        title = "诗词收藏",
         state = rememberWindowState(size = DpSize(1130.dp, 800.dp))
     ) {
         Surface(modifier = Modifier.fillMaxSize()) {

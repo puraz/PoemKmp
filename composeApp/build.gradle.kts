@@ -68,9 +68,28 @@ compose.desktop {
         mainClass = "org.example.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.example"
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.AppImage)
+            packageName = "poemkmp"
             packageVersion = "1.0.0"
+            
+            // 添加 RPM 特定配置
+            linux {
+                // RPM 包信息配置
+                packageName = "poemkmp"  // RPM 包名
+                debMaintainer = "puraz2258@gmail.com"  // 维护者邮箱
+                appCategory = "Utility"  // 应用类别
+                menuGroup = "Utility"  // 应用程序菜单分组
+                
+                // 安装位置配置
+                installationPath = "/opt/${packageName}"  // 安装路径
+                
+                // RPM 包元数据
+                rpmLicenseType = "Apache 2.0"  // 许可证类型
+                rpmPackageVersion = "1.0.0"  // 发布者
+
+                // 图标配置（可选）
+                // iconFile.set(project.file("src/main/resources/icon.png"))
+            }
         }
     }
 }

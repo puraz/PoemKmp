@@ -45,7 +45,7 @@ fun HomeScreen(
                             searchText = it
                             if (!isAISearch) {  // 普通搜索模式下实时搜索
                                 if (it.isNotBlank()) {
-                                    homeViewModel.searchPoems(it)
+                                    searchViewModel.search(it)
                                     showResults = true
                                 } else {
                                     showResults = false
