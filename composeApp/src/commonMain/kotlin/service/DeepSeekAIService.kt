@@ -215,7 +215,8 @@ class DeepSeekAIService(
         } catch (e: Exception) {
             println("AI 搜索出错: ${e.message}")
             e.printStackTrace()
-            throw AIServiceException("AI 搜索失败: ${e.message}")
+            return emptyList()
+            // throw AIServiceException("AI 搜索失败: ${e.message}")
         }
     }
     

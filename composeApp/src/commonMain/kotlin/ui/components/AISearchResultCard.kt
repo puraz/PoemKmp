@@ -105,10 +105,3 @@ fun AISearchResultCard(
         }
     }
 }
-
-private fun RowScope.Icon(
-    imageVector: Any,
-    contentDescription: kotlin.String,
-    tint: androidx.compose.ui.graphics.Color
-) {
-}

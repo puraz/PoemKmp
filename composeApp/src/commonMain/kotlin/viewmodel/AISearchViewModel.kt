@@ -96,4 +96,8 @@ class AISearchViewModel(
             }
         }
     }
+
+    fun clearSearchResults() {
+        _searchResults.value = emptyList()
+    }
 } 

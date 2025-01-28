@@ -32,7 +32,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "诗词鉴赏",
-        state = rememberWindowState(size = DpSize(1200.dp, 800.dp))
+        state = rememberWindowState(size = DpSize(1130.dp, 750.dp))
     ) {
         Surface(modifier = Modifier.fillMaxSize()) {
             when {

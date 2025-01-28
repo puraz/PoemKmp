@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -27,6 +28,7 @@ fun AISearchPanel(
 ) {
     var searchText by remember { mutableStateOf("") }
     var showAddSuccessSnackbar by remember { mutableStateOf(false) }
+    var hasSearched by remember { mutableStateOf(false) }
     
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -36,28 +38,56 @@ fun AISearchPanel(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
-                    OutlinedTextField(
-                        value = searchText,
-                        onValueChange = { 
-                            searchText = it
-                            viewModel.searchOutsideSystem(it)
-                        },
-                        label = { Text("搜索新诗词") },
-                        placeholder = { Text("例如：描写思乡的诗词、关于春天的诗...") },
-                        leadingIcon = { 
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "搜索"
-                            )
-                        },
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
-                    )
-                    
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = searchText,
+                            onValueChange = {
+                                searchText = it
+                                if (it.isBlank()) {
+                                    viewModel.clearSearchResults()
+                                }
+                            },
+                            label = { Text("搜索新诗词") },
+                            placeholder = { Text("例如：描写思乡的诗词、关于春天的诗...") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "搜索"
+                                )
+                            },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    if (searchText.isNotBlank()) {
+                                        hasSearched = true
+                                        viewModel.searchOutsideSystem(searchText)
+                                    }
+                                }
+                            )
+                        )
+
+                        Button(
+                            // modifier = Modifier.padding(top = 9.dp),
+                            onClick = {
+                                if (searchText.isNotBlank()) {
+                                    hasSearched = true
+                                    viewModel.searchOutsideSystem(searchText)
+                                }
+                            }
+                        ) {
+                            Text("搜索")
+                        }
+                    }
                     // 搜索提示
                     AnimatedVisibility(
-                        visible = searchText.isNotBlank(),
+                        visible = viewModel.isLoading.value,
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut()
                     ) {
@@ -70,7 +100,7 @@ fun AISearchPanel(
                     }
                 }
             }
-            
+
             // 搜索结果
             Box(modifier = Modifier.weight(1f)) {
                 when {
@@ -103,8 +133,9 @@ fun AISearchPanel(
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                             )
                         }
+                        hasSearched = false
                     }
-                    viewModel.searchResults.value.isEmpty() -> {
+                    viewModel.searchResults.value.isEmpty() && hasSearched -> {
                         Column(
                             modifier = Modifier.fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -112,6 +143,19 @@ fun AISearchPanel(
                         ) {
                             Text(
                                 text = "未找到相关诗词",
+                                style = MaterialTheme.typography.h6,
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                    !hasSearched -> {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "输入关键词开始搜索",
                                 style = MaterialTheme.typography.h6,
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                             )

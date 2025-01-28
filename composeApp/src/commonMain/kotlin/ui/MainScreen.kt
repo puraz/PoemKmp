@@ -16,7 +16,7 @@ import viewmodel.ViewModelFactory
 fun MainScreen(viewModelFactory: ViewModelFactory) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
     val homeViewModel = remember { viewModelFactory.createHomeViewModel() }
-    // val searchViewModel = remember { viewModelFactory.createSearchViewModel() }
+    val searchViewModel = remember { viewModelFactory.createSearchViewModel() }
     val aiSearchViewModel = remember { viewModelFactory.createAISearchViewModel() }
     
     MaterialTheme {
@@ -41,6 +41,7 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
                 when (currentScreen) {
                     Screen.Home -> HomeScreen(
                         homeViewModel = homeViewModel,
+                        searchViewModel = searchViewModel,
                         aiSearchViewModel = aiSearchViewModel
                     )
                     Screen.Favorites -> FavoritesScreen(

@@ -15,60 +15,133 @@ import androidx.compose.ui.unit.dp
 import ui.components.*
 import viewmodel.AISearchViewModel
 import viewmodel.HomeViewModel
-
+import viewmodel.SearchViewModel
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel,
+    searchViewModel: SearchViewModel,
     aiSearchViewModel: AISearchViewModel,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         var searchText by remember { mutableStateOf("") }
         var showResults by remember { mutableStateOf(false) }
+        var isAISearch by remember { mutableStateOf(false) }  // 添加搜索模式状态
+        var hasAISearched by remember { mutableStateOf(false) }  // AI搜索状态标记
         
         Row(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.weight(1f)) {
                 // 搜索栏
-                OutlinedTextField(
-                    value = searchText,
-                    onValueChange = { 
-                        searchText = it
-                        if (it.isNotBlank()) {
-                            aiSearchViewModel.searchInSystem(it)
-                            showResults = true
-                        } else {
-                            showResults = false
-                        }
-                    },
-                    label = { Text("搜索系统内诗词") },
-                    placeholder = { Text("输入关键词进行语义搜索...") },
-                    leadingIcon = { 
-                        Icon(Icons.Default.Search, "搜索")
-                    },
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
-                )
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = searchText,
+                        onValueChange = { 
+                            searchText = it
+                            if (!isAISearch) {  // 普通搜索模式下实时搜索
+                                if (it.isNotBlank()) {
+                                    searchViewModel.search(it)
+                                    showResults = true
+                                } else {
+                                    showResults = false
+                                }
+                            } else {  // AI搜索模式下，清空时重置状态
+                                if (it.isBlank()) {
+                                    hasAISearched = false
+                                    showResults = false
+                                }
+                            }
+                        },
+                        label = { Text(if (isAISearch) "AI语义搜索" else "普通搜索") },
+                        placeholder = { Text(if (isAISearch) "输入描述进行语义搜索..." else "输入关键词搜索...") },
+                        leadingIcon = { 
+                            Icon(Icons.Default.Search, "搜索")
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    // 搜索模式切换按钮
+                    TextButton(
+                        onClick = { 
+                            isAISearch = !isAISearch
+                            searchText = ""  // 切换模式时清空搜索文本
+                            showResults = false
+                            hasAISearched = false
+                        }
+                    ) {
+                        Text(if (isAISearch) "切换普通搜索" else "切换AI搜索")
+                    }
+                    
+                    // AI搜索模式下显示搜索按钮
+                    if (isAISearch) {
+                        Button(
+                            onClick = {
+                                if (searchText.isNotBlank()) {
+                                    aiSearchViewModel.searchInSystem(searchText)
+                                    hasAISearched = true
+                                    showResults = true
+                                }
+                            }
+                        ) {
+                            Text("搜索")
+                        }
+                    }
+                }
 
                 // 搜索结果或诗词列表
                 Box(modifier = Modifier.weight(1f)) {
                     when {
-                        aiSearchViewModel.isLoading.value -> {
+                        isAISearch && aiSearchViewModel.isLoading.value -> {
                             CircularProgressIndicator(
                                 modifier = Modifier.align(Alignment.Center)
                             )
                         }
-                        showResults && searchText.isNotBlank() -> {
-                            LazyColumn(
-                                contentPadding = PaddingValues(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                items(aiSearchViewModel.searchResults.value) { result ->
-                                    AISearchResultCard(
-                                        result = result,
-                                        onAddToSystem = {}, // 系统内搜索不需要添加功能
-                                        onClick = {}
-                                    )
+                        isAISearch && showResults && hasAISearched -> {
+                            if (aiSearchViewModel.searchResults.value.isEmpty()) {
+                                // AI搜索无结果显示
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("未找到相关诗词")
+                                }
+                            } else {
+                                LazyColumn(
+                                    contentPadding = PaddingValues(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(aiSearchViewModel.searchResults.value) { result ->
+                                        AISearchResultCard(
+                                            result = result,
+                                            onAddToSystem = {}, // 系统内搜索不需要添加功能
+                                            onClick = {}
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        !isAISearch && showResults -> {
+                            // 普通搜索结果
+                            if (searchViewModel.searchResults.value.isEmpty()) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("未找到相关诗词")
+                                }
+                            } else {
+                                LazyColumn {
+                                    items(searchViewModel.searchResults.value) { poem ->
+                                        PoemListItem(
+                                            poem = poem,
+                                            onClick = { homeViewModel.onPoemSelected(poem) }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -133,13 +206,4 @@ fun HomeScreen(
             )
         }
     }
-}
-
-fun HomeScreen(
-    viewModel: AISearchViewModel,
-    modifier: Modifier = Modifier
-) {
-
-
-
 }

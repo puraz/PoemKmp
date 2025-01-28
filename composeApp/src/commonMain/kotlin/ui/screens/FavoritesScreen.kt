@@ -52,7 +52,7 @@ fun FavoritesScreen(viewModel: FavoritesViewModel) {
                     // 收藏列表
                     Column(
                         modifier = Modifier
-                            .weight(0.4f)
+                            .weight(1f)
                             .fillMaxHeight()
                     ) {
                         // 标题栏
