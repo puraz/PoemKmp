@@ -3,6 +3,7 @@ package service
 import data.db.Poem_entity
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -26,6 +27,13 @@ class DeepSeekAIService(
         install(ContentNegotiation) {
             json(json)
         }
+        
+        // 添加超时设置
+        install(HttpTimeout) {
+            requestTimeoutMillis = 60000  // 60秒
+            connectTimeoutMillis = 60000  // 连接超时也设置为60秒
+            socketTimeoutMillis = 60000   // socket超时也设置为60秒
+        }
     }
 
     @Serializable
@@ -44,7 +52,7 @@ class DeepSeekAIService(
         val model: String = "deepseek-chat",
         val messages: List<Message>,
         val frequency_penalty: Int = 0,
-        val max_tokens: Int = 2048,
+        val max_tokens: Int = 4096,
         val presence_penalty: Int = 0,
         val response_format: ResponseFormat = ResponseFormat(),
         val temperature: Double = 0.7,

@@ -30,12 +30,21 @@ fun AISearchPanel(
     var showAddSuccessSnackbar by remember { mutableStateOf(false) }
     var hasSearched by remember { mutableStateOf(false) }
     
-    Box(modifier = modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // 搜索栏
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            // .padding(8.dp)  // 添加整体内边距
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            // 搜索栏 - 使用 Surface 固定在顶部
             Surface(
                 elevation = 4.dp,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()  // 高度适应内容
             ) {
                 Column {
                     Row(
@@ -63,9 +72,10 @@ fun AISearchPanel(
                             },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
+                            enabled = !viewModel.isLoading.value,  // 搜索时禁用输入
                             keyboardActions = KeyboardActions(
                                 onSearch = {
-                                    if (searchText.isNotBlank()) {
+                                    if (searchText.isNotBlank() && !viewModel.isLoading.value) {
                                         hasSearched = true
                                         viewModel.searchOutsideSystem(searchText)
                                     }
@@ -74,17 +84,18 @@ fun AISearchPanel(
                         )
 
                         Button(
-                            // modifier = Modifier.padding(top = 9.dp),
                             onClick = {
                                 if (searchText.isNotBlank()) {
                                     hasSearched = true
                                     viewModel.searchOutsideSystem(searchText)
                                 }
-                            }
+                            },
+                            enabled = searchText.isNotBlank() && !viewModel.isLoading.value  // 搜索时禁用按钮
                         ) {
                             Text("搜索")
                         }
                     }
+                    
                     // 搜索提示
                     AnimatedVisibility(
                         visible = viewModel.isLoading.value,
@@ -101,31 +112,37 @@ fun AISearchPanel(
                 }
             }
 
-            // 搜索结果
-            Box(modifier = Modifier.weight(1f)) {
+            // 搜索结果 - 使用固定高度的容器
+            Box(
+                modifier = Modifier
+                    .weight(1f)  // 占用剩余空间
+                    .fillMaxWidth()
+            ) {
                 when {
                     viewModel.isLoading.value -> {
-                        Column(
+                        Box(
                             modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(48.dp)
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "正在搜索相关诗词...",
-                                style = MaterialTheme.typography.body2,
-                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                            )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "正在搜索相关诗词...",
+                                    style = MaterialTheme.typography.body2,
+                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                )
+                            }
                         }
                     }
-                    searchText.isBlank() -> {
-                        Column(
+                    searchText.isBlank() || !hasSearched -> {
+                        Box(
                             modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "输入关键词开始搜索",
@@ -133,13 +150,11 @@ fun AISearchPanel(
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                             )
                         }
-                        hasSearched = false
                     }
                     viewModel.searchResults.value.isEmpty() && hasSearched -> {
-                        Column(
+                        Box(
                             modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "未找到相关诗词",
@@ -148,23 +163,11 @@ fun AISearchPanel(
                             )
                         }
                     }
-                    !hasSearched -> {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "输入关键词开始搜索",
-                                style = MaterialTheme.typography.h6,
-                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
-                    }
                     else -> {
                         LazyColumn(
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            contentPadding = PaddingValues(vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxSize()
                         ) {
                             items(viewModel.searchResults.value) { result ->
                                 AISearchResultCard(
@@ -182,7 +185,7 @@ fun AISearchPanel(
             }
         }
         
-        // 添加成功提示
+        // Snackbar
         if (showAddSuccessSnackbar) {
             Snackbar(
                 modifier = Modifier
@@ -197,7 +200,6 @@ fun AISearchPanel(
                 Text("诗词已添加到系统")
             }
             
-            // 自动隐藏 Snackbar
             LaunchedEffect(showAddSuccessSnackbar) {
                 delay(2000)
                 showAddSuccessSnackbar = false

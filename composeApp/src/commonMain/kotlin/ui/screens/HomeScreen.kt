@@ -45,7 +45,7 @@ fun HomeScreen(
                             searchText = it
                             if (!isAISearch) {  // 普通搜索模式下实时搜索
                                 if (it.isNotBlank()) {
-                                    searchViewModel.search(it)
+                                    homeViewModel.searchPoems(it)
                                     showResults = true
                                 } else {
                                     showResults = false
@@ -62,7 +62,8 @@ fun HomeScreen(
                         leadingIcon = { 
                             Icon(Icons.Default.Search, "搜索")
                         },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        enabled = !(isAISearch && aiSearchViewModel.isLoading.value)  // AI搜索时禁用输入
                     )
                     
                     // 搜索模式切换按钮
@@ -72,7 +73,8 @@ fun HomeScreen(
                             searchText = ""  // 切换模式时清空搜索文本
                             showResults = false
                             hasAISearched = false
-                        }
+                        },
+                        enabled = !aiSearchViewModel.isLoading.value  // 搜索时禁用切换按钮
                     ) {
                         Text(if (isAISearch) "切换普通搜索" else "切换AI搜索")
                     }
@@ -86,7 +88,8 @@ fun HomeScreen(
                                     hasAISearched = true
                                     showResults = true
                                 }
-                            }
+                            },
+                            enabled = searchText.isNotBlank() && !aiSearchViewModel.isLoading.value  // 搜索时禁用按钮
                         ) {
                             Text("搜索")
                         }
