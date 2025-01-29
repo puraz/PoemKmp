@@ -1,20 +1,18 @@
 package ui.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
+import manager.AIModelManager
 import ui.navigation.Screen
-import viewmodel.SearchViewModel
 import viewmodel.AISearchViewModel
-import data.db.Poem_entity
 
 @Composable
 fun NavigationDrawerContent(
@@ -24,6 +22,7 @@ fun NavigationDrawerContent(
     modifier: Modifier = Modifier
 ) {
     var showSearchDialog by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
     
     Column(
         modifier = modifier
@@ -65,13 +64,30 @@ fun NavigationDrawerContent(
             selected = currentScreen is Screen.Favorites,
             onClick = { onScreenSelected(Screen.Favorites) }
         )
-        
+
         Spacer(modifier = Modifier.weight(1f))
         
-        // 添加主题设置
+        // 设置区域
         Divider()
         Spacer(modifier = Modifier.height(16.dp))
+        
+        // 主题设置
         ThemeSettings()
+        
+        // AI 设置
+        SettingsItem(
+            icon = Icons.Default.Settings,
+            title = "AI 设置",
+            value = AIModelManager.currentModel.value.displayName,
+            onClick = { showSettingsDialog = true }
+        )
+    }
+
+    // AI 设置对话框
+    if (showSettingsDialog) {
+        AISettingsDialog(
+            onDismiss = { showSettingsDialog = false }
+        )
     }
 
     // 搜索对话框

@@ -8,6 +8,8 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import data.DatabaseManager
+import manager.AIModelManager
 import theme.ThemeManager
 import ui.components.NavigationDrawerContent
 import ui.navigation.Screen
@@ -16,7 +18,10 @@ import ui.screens.HomeScreen
 import viewmodel.ViewModelFactory
 
 @Composable
-fun MainScreen(viewModelFactory: ViewModelFactory) {
+fun MainScreen(viewModelFactory: ViewModelFactory, databaseManager: DatabaseManager) {
+    // 初始化 AIModelManager
+    AIModelManager.initialize(databaseManager)
+    
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
     val homeViewModel = remember { viewModelFactory.createHomeViewModel() }
     val searchViewModel = remember { viewModelFactory.createSearchViewModel() }

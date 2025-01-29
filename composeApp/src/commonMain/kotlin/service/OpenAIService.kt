@@ -1,19 +1,20 @@
 package service
 
 import data.db.Poem_entity
-import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.call.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 
-class DeepSeekAIService(
+class OpenAIService(
     private val apiKey: String,
-    private val baseUrl: String = "https://api.deepseek.com/v1"
+    private val model: String = "gpt-4-turbo-preview",
+    private val baseUrl: String = "https://api.openai.com/v1"
 ) : BaseAIService(), AIService {
-    
+
     @Serializable
     private data class ChatRequest(
-        val model: String = "deepseek-chat",
+        val model: String,
         val messages: List<Message>,
         val temperature: Double = 0.7
     )
@@ -30,52 +31,10 @@ class DeepSeekAIService(
     ) {
         @Serializable
         data class Choice(
-            val message: Message
+            val message: Message,
+            val finish_reason: String
         )
     }
-
-    @Serializable
-    private data class ResponseFormat(
-        val type: String = "json_object"
-    )
-
-    @Serializable
-    private data class PromptTokensDetails(
-        val cached_tokens: Int
-    )
-
-    @Serializable
-    private data class Usage(
-        val prompt_tokens: Int,
-        val completion_tokens: Int,
-        val total_tokens: Int,
-        val prompt_tokens_details: PromptTokensDetails,
-        val prompt_cache_hit_tokens: Int,
-        val prompt_cache_miss_tokens: Int
-    )
-
-    @Serializable
-    private data class Choice(
-        val index: Int,
-        val message: Message,
-        val logprobs: String? = null,
-        val finish_reason: String
-    )
-
-    @Serializable
-    private data class SearchResult(
-        val title: String,
-        val author: String,
-        val dynasty: String?,
-        val content: String,
-        val relevance_score: Double,
-        val match_reason: String
-    )
-
-    @Serializable
-    private data class SearchResponse(
-        val results: List<SearchResult>
-    )
 
     @Serializable
     private data class ErrorResponse(
@@ -85,7 +44,8 @@ class DeepSeekAIService(
         data class Error(
             val message: String,
             val type: String,
-            val code: Int? = null
+            val code: String? = null,
+            val param: String? = null
         )
     }
 
@@ -96,9 +56,9 @@ class DeepSeekAIService(
         try {
             val systemPrompt = createSystemPrompt(query)
             val userPrompt = if (poems.isEmpty()) {
-                "请基于我的搜索意图推荐一些古诗词。要求返回 JSON 格式，包含 title, content, author, dynasty, relevanceScore, matchReason 字段。"
+                "基于搜索意图推荐古诗词，返回 JSON 数组格式，包含 title, content, author, dynasty, relevanceScore, matchReason 字段。"
             } else {
-                "请分析以下诗词是否符合我的搜索意图，并按相关度排序。诗词列表：\n" +
+                "分析并排序以下诗词：\n" +
                 poems.joinToString("\n") { "${it.title} - ${it.author}：${it.content}" }
             }
 
@@ -106,6 +66,7 @@ class DeepSeekAIService(
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $apiKey")
                 setBody(ChatRequest(
+                    model = model,
                     messages = listOf(
                         Message("system", systemPrompt),
                         Message("user", userPrompt)
@@ -119,54 +80,56 @@ class DeepSeekAIService(
                     val content = chatResponse.choices.firstOrNull()?.message?.content
                         ?: throw AIServiceException.InvalidResponseError("响应内容为空")
                     
-                    // 验证 JSON 响应格式
-                    validateJsonResponse(content)
+                    if (chatResponse.choices.firstOrNull()?.finish_reason != "stop") {
+                        throw AIServiceException.InvalidResponseError("响应未完全生成")
+                    }
                     
-                    // 解析并验证结果
+                    validateJsonResponse(content)
                     val results = json.decodeFromString<List<AISearchResult>>(content)
                     validateSearchResults(results)
                     results
                 }
                 HttpStatusCode.Unauthorized -> 
-                    throw AIServiceException.AuthenticationError("API Key 无效")
+                    throw AIServiceException.AuthenticationError("OpenAI API Key 无效")
                 HttpStatusCode.TooManyRequests -> 
-                    throw AIServiceException.RateLimitError("超过请求限制")
+                    throw AIServiceException.RateLimitError("OpenAI API 请求频率超限")
                 else -> {
                     val errorBody = response.body<ErrorResponse>()
                     throw AIServiceException.APIError(
                         response.status.value,
-                        errorBody.error.message
+                        "OpenAI API 错误: ${errorBody.error.message}"
                     )
                 }
             }
         } catch (e: Exception) {
             when (e) {
                 is AIServiceException -> throw e
-                else -> throw AIServiceException.NetworkError(e.message ?: "未知错误", e)
+                else -> throw AIServiceException.NetworkError("OpenAI API 调用失败: ${e.message}", e)
             }
         }
     }
-    
+
     override suspend fun analyzePoemContent(poem: Poem_entity): PoemAnalysis = withRetry {
         try {
             val prompt = """
-                请分析这首诗：
+                分析这首诗：
                 《${poem.title}》 - ${poem.author}
                 ${poem.content}
                 
-                请从以下维度进行分析，并以 JSON 格式返回：
-                1. theme: 主题思想
-                2. style: 写作风格
-                3. interpretation: 诗歌赏析
-                4. culturalContext: 文化背景
-                5. literaryDevices: 写作手法 (数组)
-                6. emotions: 情感特征 (数组)
+                请以 JSON 格式返回分析结果，必须包含以下字段：
+                - theme: 主题思想
+                - style: 写作风格
+                - interpretation: 诗歌赏析
+                - culturalContext: 文化背景
+                - literaryDevices: 写作手法数组
+                - emotions: 情感特征数组
             """.trimIndent()
 
             val response = client.post("$baseUrl/chat/completions") {
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $apiKey")
                 setBody(ChatRequest(
+                    model = model,
                     messages = listOf(Message("user", prompt))
                 ))
             }
@@ -178,27 +141,26 @@ class DeepSeekAIService(
                         ?: throw AIServiceException.InvalidResponseError("响应内容为空")
                     
                     validateJsonResponse(content)
-                    
                     val analysis = json.decodeFromString<PoemAnalysis>(content)
                     validatePoemAnalysis(analysis)
                     analysis
                 }
                 HttpStatusCode.Unauthorized -> 
-                    throw AIServiceException.AuthenticationError("API Key 无效")
+                    throw AIServiceException.AuthenticationError("OpenAI API Key 无效")
                 HttpStatusCode.TooManyRequests -> 
-                    throw AIServiceException.RateLimitError("超过请求限制")
+                    throw AIServiceException.RateLimitError("OpenAI API 请求频率超限")
                 else -> {
                     val errorBody = response.body<ErrorResponse>()
                     throw AIServiceException.APIError(
                         response.status.value,
-                        errorBody.error.message
+                        "OpenAI API 错误: ${errorBody.error.message}"
                     )
                 }
             }
         } catch (e: Exception) {
             when (e) {
                 is AIServiceException -> throw e
-                else -> throw AIServiceException.NetworkError(e.message ?: "未知错误", e)
+                else -> throw AIServiceException.NetworkError("OpenAI API 调用失败: ${e.message}", e)
             }
         }
     }
@@ -225,5 +187,4 @@ class DeepSeekAIService(
         require(analysis.literaryDevices.isNotEmpty()) { "写作手法不能为空" }
         require(analysis.emotions.isNotEmpty()) { "情感特征不能为空" }
     }
-}
-
+} 

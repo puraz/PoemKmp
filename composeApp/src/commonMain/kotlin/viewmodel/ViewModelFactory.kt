@@ -1,29 +1,34 @@
 package viewmodel
 
 import data.PoemRepository
+import manager.AIModelManager
 import service.AIService
 import service.DeepSeekAIService
+import service.GeminiAIService
+import service.OpenAIService
 
 class ViewModelFactory(
-    private val repository: PoemRepository,
-    private val apiKey: String,  // DeepSeek API Key
-    private val baseUrl: String = "https://api.deepseek.com"
+    private val repository: PoemRepository
 ) {
-    // 懒加载创建 AIService 实例
-    private val aiService: AIService by lazy {
-        DeepSeekAIService(
-            apiKey = apiKey,
-            baseUrl = baseUrl
-        )
+    private fun createAIService(): AIService {
+        return when (AIModelManager.currentModel.value) {
+            AIModelManager.AIModel.DEEPSEEK -> DeepSeekAIService(
+                apiKey = AIModelManager.getApiKey()
+            )
+            AIModelManager.AIModel.OPENAI -> OpenAIService(
+                apiKey = AIModelManager.getApiKey()
+            )
+            AIModelManager.AIModel.GEMINI -> GeminiAIService(
+                apiKey = AIModelManager.getApiKey()
+            )
+        }
     }
 
     fun createHomeViewModel(): HomeViewModel = HomeViewModel(repository)
-    
     fun createFavoritesViewModel(): FavoritesViewModel = FavoritesViewModel(repository)
     fun createSearchViewModel(): SearchViewModel = SearchViewModel(repository)
-
     fun createAISearchViewModel(): AISearchViewModel = AISearchViewModel(
         poemRepository = repository,
-        aiService = aiService
+        aiService = createAIService()
     )
 }

@@ -41,6 +41,14 @@ kotlin {
 
             // 根据平台选择合适的 HTTP 引擎
             implementation("io.ktor:ktor-client-cio:2.3.7")
+
+            // 添加 multiplatform-settings 依赖
+            implementation("com.russhwolf:multiplatform-settings:1.1.1")
+            // 如果需要协程支持，也可以添加
+            implementation("com.russhwolf:multiplatform-settings-coroutines:1.1.1")
+
+            // Material 图标库
+            implementation(compose.materialIconsExtended)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

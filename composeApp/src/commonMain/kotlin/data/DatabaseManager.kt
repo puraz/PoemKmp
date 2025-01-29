@@ -13,7 +13,7 @@ class DatabaseManager(private val driver: SqlDriver) {
     private val database = PoemDatabase(driver)
     private val poemQueries = database.poemEntityQueries
     private val tagQueries = database.tagEntityQueries
-
+    internal val settingsQueries = database.settingsEntityQueries
     // 诗词相关操作
     fun getAllPoems(): Flow<List<Poem_entity>> =
         poemQueries.selectAll()

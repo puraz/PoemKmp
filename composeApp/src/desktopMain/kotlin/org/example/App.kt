@@ -13,20 +13,17 @@ import ui.MainScreen
 import viewmodel.ViewModelFactory
 
 @Composable
-fun App(
-    deepseekApiKey: String,  // 从环境变量或配置文件获取
-    deepseekBaseUrl: String = "https://api.deepseek.com"
-) {
+fun App() {
     val driver = remember { DesktopDatabaseDriver.create() }
     val databaseManager = remember { DatabaseManager(driver) }
     val repository = remember { PoemRepository(databaseManager) }
-    val viewModelFactory = remember { ViewModelFactory(repository, deepseekApiKey, deepseekBaseUrl) }
+    val viewModelFactory = remember { ViewModelFactory(repository) }
 
     MaterialTheme {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            MainScreen(viewModelFactory = viewModelFactory)
+            MainScreen(viewModelFactory = viewModelFactory, databaseManager)
         }
     }
 }

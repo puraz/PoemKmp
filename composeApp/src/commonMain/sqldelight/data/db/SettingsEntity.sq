@@ -1,0 +1,21 @@
+CREATE TABLE settings_entity (
+    key TEXT PRIMARY KEY NOT NULL,
+    value TEXT NOT NULL,
+    update_time INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)
+);
+
+-- 获取设置值
+selectByKey:
+SELECT value
+FROM settings_entity
+WHERE key = ?;
+
+-- 插入或更新设置
+upsertSetting:
+INSERT OR REPLACE INTO settings_entity (key, value, update_time)
+VALUES (?, ?, ?);
+
+-- 删除设置
+deleteSetting:
+DELETE FROM settings_entity
+WHERE key = ?; 
