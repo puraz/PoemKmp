@@ -1,14 +1,14 @@
 package service
 
 import data.db.Poem_entity
-import io.ktor.client.request.*
 import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 
 class GeminiAIService(
     private val apiKey: String,
-    private val baseUrl: String = "https://generativelanguage.googleapis.com/v1"
+    private val baseUrl: String = "https://generativelanguage.googleapis.com/v1beta"
 ) : BaseAIService(), AIService {
 
     @Serializable
@@ -82,7 +82,7 @@ class GeminiAIService(
                 poems.joinToString("\n") { "${it.title} - ${it.author}：${it.content}" }
             }
 
-            val response = client.post("$baseUrl/models/gemini-pro:generateContent?key=$apiKey") {
+            val response = client.post("$baseUrl/models/gemini-1.5-flash:generateContent?key=$apiKey") {
                 contentType(ContentType.Application.Json)
                 setBody(GeminiRequest(
                     contents = listOf(

@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,7 +68,7 @@ fun AISearchResultCard(
                     onClick = onAddToSystem,
                     modifier = Modifier.size(48.dp)
                 ) {
-                    androidx.compose.material.Icon(
+                    Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "添加到系统",
                         tint = MaterialTheme.colors.primary

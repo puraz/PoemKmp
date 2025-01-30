@@ -6,13 +6,34 @@ import data.PoemRepository
 import data.db.Poem_entity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import service.AISearchResult
-import service.AIService
+import manager.AIModelManager
+import service.*
 
 class AISearchViewModel(
     private val poemRepository: PoemRepository,
-    private val aiService: AIService
+    private var aiService: AIService
 ) : BaseViewModel() {
+    init {
+        // 监听 AI 模型变化
+        AIModelManager.addModelChangeListener {
+            println("AIModelManager.AIModel.OPENAI: ${AIModelManager.AIModel.OPENAI}")
+            // 更新 AIService
+            aiService = when (AIModelManager.currentModel.value) {
+                AIModelManager.AIModel.DEEPSEEK -> DeepSeekAIService(
+                    apiKey = AIModelManager.getApiKey()
+                )
+
+                AIModelManager.AIModel.OPENAI -> OpenAIService(
+                    apiKey = AIModelManager.getApiKey()
+                )
+
+                AIModelManager.AIModel.GEMINI -> GeminiAIService(
+                    apiKey = AIModelManager.getApiKey()
+                )
+            }
+        }
+    }
+
     private val _searchResults = mutableStateOf<List<AISearchResult>>(emptyList())
     val searchResults: State<List<AISearchResult>> = _searchResults.asState()
 
@@ -51,6 +72,7 @@ class AISearchViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             try {
+                println("ai service : $aiService")
                 val aiResults = aiService.semanticSearch(
                     query = query,
                     poems = emptyList()  // 传入空列表表示搜索系统外的诗词
@@ -99,5 +121,10 @@ class AISearchViewModel(
 
     fun clearSearchResults() {
         _searchResults.value = emptyList()
+    }
+
+    // 在 ViewModel 销毁时移除监听器
+    override fun onCleared() {
+        AIModelManager.removeModelChangeListener { /* 对应的监听器逻辑 */ }
     }
 } 

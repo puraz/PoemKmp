@@ -24,18 +24,25 @@ abstract class BaseAIService {
         }
         
         install(HttpTimeout) {
-            requestTimeoutMillis = 60000
-            connectTimeoutMillis = 60000
-            socketTimeoutMillis = 60000
+            requestTimeoutMillis = 10000
+            connectTimeoutMillis = 10000
+            socketTimeoutMillis = 10000
         }
         
         // 全局错误处理
         install(HttpCallValidator) {
-            handleResponseException { cause ->
+            handleResponseExceptionWithRequest { cause, request ->
                 throw when (cause) {
-                    is HttpRequestTimeoutException -> AIServiceException.NetworkError("请求超时", cause)
-                    is ConnectTimeoutException -> AIServiceException.NetworkError("连接超时", cause)
-                    else -> AIServiceException.NetworkError(cause.message ?: "未知网络错误", cause)
+                    is HttpRequestTimeoutException ->
+                        AIServiceException.NetworkError("请求超时: ${request.url}", cause)
+
+                    is ConnectTimeoutException ->
+                        AIServiceException.NetworkError("连接超时: ${request.url}", cause)
+
+                    else -> AIServiceException.NetworkError(
+                        "访问 ${request.url} 时发生错误: ${cause.message ?: "未知网络错误"}",
+                        cause
+                    )
                 }
             }
         }

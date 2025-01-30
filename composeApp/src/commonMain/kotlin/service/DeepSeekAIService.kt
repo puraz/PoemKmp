@@ -15,7 +15,13 @@ class DeepSeekAIService(
     private data class ChatRequest(
         val model: String = "deepseek-chat",
         val messages: List<Message>,
-        val temperature: Double = 0.7
+        val frequency_penalty: Int = 0,
+        val max_tokens: Int = 4096,
+        val presence_penalty: Int = 0,
+        val response_format: ResponseFormat = ResponseFormat(),
+        val temperature: Double = 0.7,
+        val top_p: Double = 1.0,
+        val stream: Boolean = false
     )
 
     @Serializable

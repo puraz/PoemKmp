@@ -6,23 +6,18 @@ import data.DatabaseManager
 
 object AIModelManager {
     private lateinit var databaseManager: DatabaseManager
-
-    fun initialize(dbManager: DatabaseManager) {
-        databaseManager = dbManager
-    }
-
-    enum class AIModel(val displayName: String, val configKey: String) {
-        DEEPSEEK("DeepSeek", "deepseek_api_key"),
-        OPENAI("OpenAI", "openai_api_key"),
-        GEMINI("Google Gemini", "gemini_api_key")
-    }
-
+    private val modelChangeListeners = mutableListOf<() -> Unit>()
     private val defaultModel = AIModel.DEEPSEEK
 
     val currentModel: MutableState<AIModel> = mutableStateOf(defaultModel)
 
-    init {
-        // 初始化时从数据库加载当前模型设置
+    fun initialize(dbManager: DatabaseManager) {
+        databaseManager = dbManager
+        // 初始化后从数据库加载设置
+        loadSettings()
+    }
+
+    private fun loadSettings() {
         try {
             val modelName = getSetting("current_model", defaultModel.name)
             currentModel.value = AIModel.valueOf(modelName)
@@ -32,9 +27,17 @@ object AIModelManager {
         }
     }
 
+    enum class AIModel(val displayName: String, val configKey: String) {
+        DEEPSEEK("DeepSeek", "deepseek_api_key"),
+        OPENAI("OpenAI", "openai_api_key"),
+        GEMINI("Google Gemini", "gemini_api_key")
+    }
+
     fun setModel(model: AIModel) {
         setSetting("current_model", model.name)
         currentModel.value = model
+        // 通知所有监听器
+        modelChangeListeners.forEach { it.invoke() }
     }
 
     fun getApiKey(): String {
@@ -46,17 +49,24 @@ object AIModelManager {
     }
 
     private fun getSetting(key: String, defaultValue: String): String {
+        if (!::databaseManager.isInitialized) {
+            return defaultValue
+        }
         return try {
-            databaseManager.settingsQueries
+            val aiSetting = databaseManager.settingsQueries
                 .selectByKey(key)
                 .executeAsOneOrNull()
-                ?: defaultValue
+            aiSetting ?: defaultValue
         } catch (e: Exception) {
             defaultValue
         }
     }
 
     private fun setSetting(key: String, value: String) {
+        if (!::databaseManager.isInitialized) {
+            println("数据库管理器未初始化，无法保存设置")
+            return
+        }
         try {
             databaseManager.settingsQueries.upsertSetting(
                 key = key,
@@ -64,8 +74,17 @@ object AIModelManager {
                 update_time = System.currentTimeMillis()
             )
         } catch (e: Exception) {
-            // 可以添加错误日志或处理
             println("设置保存失败: ${e.message}")
         }
+    }
+
+    // 添加监听器
+    fun addModelChangeListener(listener: () -> Unit) {
+        modelChangeListeners.add(listener)
+    }
+
+    // 移除监听器
+    fun removeModelChangeListener(listener: () -> Unit) {
+        modelChangeListeners.remove(listener)
     }
 } 
