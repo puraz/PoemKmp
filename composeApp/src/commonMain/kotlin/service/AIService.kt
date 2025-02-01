@@ -1,6 +1,7 @@
 package service
 
 import data.db.Poem_entity
+import kotlinx.serialization.Serializable
 
 interface AIService {
     suspend fun semanticSearch(
@@ -11,6 +12,7 @@ interface AIService {
     suspend fun analyzePoemContent(poem: Poem_entity): PoemAnalysis
 }
 
+@Serializable
 data class AISearchResult(
     val title: String,
     val content: String,
@@ -23,6 +25,7 @@ data class AISearchResult(
     val isRecommendation: Boolean = false
 )
 
+@Serializable
 data class PoemAnalysis(
     val theme: String,
     val style: String,

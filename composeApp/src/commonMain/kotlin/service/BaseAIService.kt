@@ -24,9 +24,9 @@ abstract class BaseAIService {
         }
         
         install(HttpTimeout) {
-            requestTimeoutMillis = 10000
-            connectTimeoutMillis = 10000
-            socketTimeoutMillis = 10000
+            requestTimeoutMillis = 60000
+            connectTimeoutMillis = 60000
+            socketTimeoutMillis = 60000
         }
         
         // 全局错误处理
@@ -51,7 +51,7 @@ abstract class BaseAIService {
     protected suspend fun <T> withRetry(
         maxAttempts: Int = 3,
         initialDelayMs: Long = 1000,
-        maxDelayMs: Long = 10000,
+        maxDelayMs: Long = 60000,
         block: suspend () -> T
     ): T {
         var currentDelay = initialDelayMs

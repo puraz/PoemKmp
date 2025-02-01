@@ -80,7 +80,7 @@ class DeepSeekAIService(
 
     @Serializable
     private data class SearchResponse(
-        val results: List<SearchResult>
+        val recommendations: List<SearchResult>
     )
 
     @Serializable
@@ -98,11 +98,11 @@ class DeepSeekAIService(
     override suspend fun semanticSearch(
         query: String,
         poems: List<Poem_entity>
-    ): List<AISearchResult> = withRetry {
+    ): List<AISearchResult> {
         try {
             val systemPrompt = createSystemPrompt(query)
             val userPrompt = if (poems.isEmpty()) {
-                "请基于我的搜索意图推荐一些古诗词。要求返回 JSON 格式，包含 title, content, author, dynasty, relevanceScore, matchReason 字段。"
+                "请基于我的搜索意图推荐一些古诗词。要求返回 JSON 数组格式，JSON 数组直接在最外层，不需要有名称，数组中的对象包含 title, content, author, dynasty, relevanceScore, matchReason 字段。"
             } else {
                 "请分析以下诗词是否符合我的搜索意图，并按相关度排序。诗词列表：\n" +
                 poems.joinToString("\n") { "${it.title} - ${it.author}：${it.content}" }
@@ -122,6 +122,7 @@ class DeepSeekAIService(
             when (response.status) {
                 HttpStatusCode.OK -> {
                     val chatResponse = response.body<ChatResponse>()
+                    println("chatResponse: $chatResponse")
                     val content = chatResponse.choices.firstOrNull()?.message?.content
                         ?: throw AIServiceException.InvalidResponseError("响应内容为空")
                     
@@ -131,7 +132,7 @@ class DeepSeekAIService(
                     // 解析并验证结果
                     val results = json.decodeFromString<List<AISearchResult>>(content)
                     validateSearchResults(results)
-                    results
+                    return results
                 }
                 HttpStatusCode.Unauthorized -> 
                     throw AIServiceException.AuthenticationError("API Key 无效")
