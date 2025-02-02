@@ -1,6 +1,6 @@
 package ui.components
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -27,7 +27,7 @@ fun PoemDetail(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 10.dp, vertical = 20.dp)
+            .padding(start = 10.dp, end = 10.dp, bottom = 40.dp, top = 0.dp)
             .background(colors.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -95,20 +95,38 @@ fun PoemDetail(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = 8.dp)
+                .wrapContentHeight(),
             elevation = 0.dp,
             backgroundColor = colors.surface.copy(alpha = 0.5f)
         ) {
-            Text(
-                text = poem.content,
-                style = MaterialTheme.typography.body1.copy(
-                    lineHeight = 2.em,
-                    letterSpacing = 0.5.sp
-                ),
-                color = colors.onSurface,
-                modifier = Modifier.padding(vertical = 24.dp, horizontal = 10.dp),
-                textAlign = TextAlign.Center
-            )
+            val scrollState = rememberScrollState()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                Text(
+                    text = poem.content,
+                    style = MaterialTheme.typography.body1.copy(
+                        lineHeight = 1.7.em,
+                        letterSpacing = 0.5.sp
+                    ),
+                    color = colors.onSurface,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp, horizontal = 5.dp)
+                        .verticalScroll(scrollState),
+                    textAlign = TextAlign.Center
+                )
+
+                VerticalScrollbar(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .fillMaxHeight(),
+                    adapter = rememberScrollbarAdapter(scrollState)
+                )
+            }
         }
         
         // 注释

@@ -53,7 +53,10 @@ fun FavoritesScreen(viewModel: FavoritesViewModel) {
             }
             else -> {
                 // 收藏列表和详情
-                Row(modifier = Modifier.fillMaxSize()) {
+                Row(
+                    modifier = Modifier.fillMaxSize()
+                        .padding(top = 20.dp)
+                ) {
                     // 收藏列表
                     Column(
                         modifier = Modifier
@@ -63,7 +66,7 @@ fun FavoritesScreen(viewModel: FavoritesViewModel) {
                         // 标题栏
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            elevation = 1.dp
+                            // elevation = 1.dp
                         ) {
                             Text(
                                 text = "收藏夹 (${viewModel.favoritePoems.value.size})",
@@ -94,6 +97,7 @@ fun FavoritesScreen(viewModel: FavoritesViewModel) {
                         modifier = Modifier
                             .weight(0.6f)
                             .fillMaxHeight()
+                            .padding(top = 25.dp)
                     ) {
                         viewModel.selectedPoem.value?.let { poem ->
                             PoemDetail(

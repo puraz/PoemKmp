@@ -7,7 +7,14 @@ import java.io.File
 
 object DesktopDatabaseDriver {
     fun create(): SqlDriver {
-        val databasePath = File(System.getProperty("user.home"), "poemkmp.db")
+        // 在用户目录下创建应用专用的数据目录
+        val appDataDir = File(System.getProperty("user.home"), ".poemkmp")
+        if (!appDataDir.exists()) {
+            appDataDir.mkdirs()
+        }
+
+        // 在应用数据目录下存储数据库文件
+        val databasePath = File(appDataDir, "poems.db")
         val driver = JdbcSqliteDriver(url = "jdbc:sqlite:${databasePath.absolutePath}")
         
         if (!databasePath.exists()) {

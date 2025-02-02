@@ -1,7 +1,6 @@
 package ui.components
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,15 +8,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import data.db.Poem_entity
 import kotlinx.coroutines.delay
-import service.AISearchResult
 import viewmodel.AISearchViewModel
 
 @Composable
@@ -191,13 +187,21 @@ fun AISearchPanel(
                 modifier = Modifier
                     .padding(16.dp)
                     .align(Alignment.BottomCenter),
+                backgroundColor = MaterialTheme.colors.surface,  // 使用主题的 surface 颜色
+                contentColor = MaterialTheme.colors.onSurface,  // 使用主题的 onSurface 颜色
                 action = {
                     TextButton(onClick = { showAddSuccessSnackbar = false }) {
-                        Text("知道了")
+                        Text(
+                            "知道了",
+                            color = MaterialTheme.colors.primary  // 使用主题的 primary 颜色
+                        )
                     }
                 }
             ) {
-                Text("诗词已添加到系统")
+                Text(
+                    "诗词已添加到系统",
+                    color = MaterialTheme.colors.onSurface  // 使用主题的 onSurface 颜色
+                )
             }
             
             LaunchedEffect(showAddSuccessSnackbar) {

@@ -62,9 +62,9 @@ fun AISettingsDialog(
                 // API Key 说明
                 Text(
                     text = when (selectedModel) {
-                        AIModelManager.AIModel.DEEPSEEK -> "DeepSeek API Key 获取方式：访问 deepseek.ai"
-                        AIModelManager.AIModel.OPENAI -> "OpenAI API Key 获取方式：访问 platform.openai.com"
-                        AIModelManager.AIModel.GEMINI -> "Gemini API Key 获取方式：访问 ai.google.dev"
+                        AIModelManager.AIModel.DEEPSEEK -> "DeepSeek API Key 获取方式：访问 https://platform.deepseek.com"
+                        AIModelManager.AIModel.OPENAI -> "OpenAI API Key 获取方式：访问 https://platform.openai.com"
+                        AIModelManager.AIModel.GEMINI -> "Gemini API Key 获取方式：访问 https://ai.google.dev"
                     },
                     style = MaterialTheme.typography.caption,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
