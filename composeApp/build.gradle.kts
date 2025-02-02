@@ -12,7 +12,9 @@ kotlin {
     jvm("desktop")
     
     sourceSets {
-        val desktopMain by getting
+        val desktopMain by getting {
+            resources.srcDirs("src/desktopMain/resources")
+        }
         
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -119,4 +121,8 @@ compose.desktop {
             configurationFiles.from("compose-desktop.pro")
         }
     }
+}
+
+tasks.withType<ProcessResources> {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }

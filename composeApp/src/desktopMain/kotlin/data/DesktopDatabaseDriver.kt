@@ -15,9 +15,10 @@ object DesktopDatabaseDriver {
 
         // 如果目标数据库文件不存在，从资源文件复制
         if (!databasePath.exists()) {
-            // 获取项目中预置的数据库文件
-            val inputStream = DesktopDatabaseDriver::class.java.getResourceAsStream("/poems.db")
-            requireNotNull(inputStream) { "预置数据库文件不存在" }
+            // 修改资源文件的路径获取方式
+            val inputStream = object {}.javaClass.getResourceAsStream("/poems.db")
+                ?: DesktopDatabaseDriver::class.java.classLoader.getResourceAsStream("poems.db")
+                ?: throw IllegalStateException("预置数据库文件不存在")
 
             // 复制数据库文件到应用数据目录
             databasePath.outputStream().use { output ->
