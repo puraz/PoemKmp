@@ -76,7 +76,7 @@ compose.desktop {
         mainClass = "org.example.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.AppImage)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.AppImage, TargetFormat.Exe)
             packageName = "poemkmp"
             packageVersion = "1.0.0"
             
@@ -98,6 +98,25 @@ compose.desktop {
                 // 图标配置（可选）
                 // iconFile.set(project.file("src/main/resources/icon.png"))
             }
+
+            /*windows {
+                // Windows 特定配置
+                packageName = "诗词收藏"  // 应用名称
+                dirChooser = true  // 允许用户选择安装目录
+                menuGroup = "诗词收藏"  // 开始菜单分组
+                upgradeUuid = "2258659c-c124-4b04-a60e-e5d0f0c5bf48"  // 用于应用更新的唯一标识符
+
+                // 图标配置（可选）
+                // iconFile.set(project.file("src/main/resources/icon.ico"))
+
+                // 安装程序配置
+                msiPackageVersion = "1.0.0"  // MSI 安装包版本
+                exePackageVersion = "1.0.0"  // EXE 安装包版本
+            }*/
+        }
+
+        buildTypes.release.proguard {
+            configurationFiles.from("compose-desktop.pro")
         }
     }
 }
