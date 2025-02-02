@@ -95,71 +95,80 @@ fun PoemDetail(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .wrapContentHeight(),
+                .weight(1f)
+                .padding(horizontal = 8.dp),
             elevation = 0.dp,
             backgroundColor = colors.surface.copy(alpha = 0.5f)
         ) {
-            val scrollState = rememberScrollState()
             Box(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.TopCenter
             ) {
-                Text(
-                    text = poem.content,
-                    style = MaterialTheme.typography.body1.copy(
-                        lineHeight = 1.7.em,
-                        letterSpacing = 0.5.sp
-                    ),
-                    color = colors.onSurface,
+                val scrollState = rememberScrollState()
+
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp, horizontal = 5.dp)
-                        .verticalScroll(scrollState),
-                    textAlign = TextAlign.Center
-                )
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                ) {
+                    Text(
+                        text = poem.content,
+                        style = MaterialTheme.typography.body1.copy(
+                            lineHeight = 1.7.em,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = colors.onSurface,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp, horizontal = 5.dp),
+                        textAlign = TextAlign.Center
+                    )
+
+                    // 注释部分
+                    poem.notes?.let { notes ->
+                        Spacer(modifier = Modifier.height(32.dp))
+                        Divider(
+                            color = colors.onSurface.copy(alpha = 0.08f),
+                            // modifier = Modifier.width(120.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            thickness = 1.dp
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "注释",
+                                style = MaterialTheme.typography.subtitle2.copy(
+                                    letterSpacing = 2.sp
+                                ),
+                                color = colors.onSurface.copy(alpha = 0.7f),
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
+                            Text(
+                                text = notes,
+                                style = MaterialTheme.typography.body2.copy(
+                                    lineHeight = 1.8.em
+                                ),
+                                color = colors.onSurface.copy(alpha = 0.8f),
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp)
+                            )
+                        }
+                    }
+                }
 
                 VerticalScrollbar(
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .fillMaxHeight(),
                     adapter = rememberScrollbarAdapter(scrollState)
-                )
-            }
-        }
-        
-        // 注释
-        poem.notes?.let { notes ->
-            Spacer(modifier = Modifier.height(32.dp))
-            Divider(
-                color = colors.onSurface.copy(alpha = 0.08f),
-                modifier = Modifier.width(120.dp),
-                thickness = 1.dp
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .padding(horizontal = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "注释",
-                    style = MaterialTheme.typography.subtitle2.copy(
-                        letterSpacing = 2.sp
-                    ),
-                    color = colors.onSurface.copy(alpha = 0.7f),
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-                Text(
-                    text = notes,
-                    style = MaterialTheme.typography.body2.copy(
-                        lineHeight = 1.8.em
-                    ),
-                    color = colors.onSurface.copy(alpha = 0.8f),
-                    textAlign = TextAlign.Center
                 )
             }
         }

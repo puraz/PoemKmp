@@ -198,7 +198,7 @@ class DeepSeekAIService(
             when (response.status) {
                 HttpStatusCode.OK -> {
                     val chatResponse = response.body<ChatResponse>()
-                    println("chatResponse: $chatResponse")
+                    // println("chatResponse: $chatResponse")
                     val content = chatResponse.choices.firstOrNull()?.message?.content
                         ?: throw AIServiceException.InvalidResponseError("响应内容为空")
                     

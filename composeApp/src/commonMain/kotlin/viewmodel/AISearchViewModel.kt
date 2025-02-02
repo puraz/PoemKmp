@@ -16,7 +16,7 @@ class AISearchViewModel(
     init {
         // 监听 AI 模型变化
         AIModelManager.addModelChangeListener {
-            println("AIModelManager.AIModel.OPENAI: ${AIModelManager.AIModel.OPENAI}")
+            // println("AIModelManager.AIModel.OPENAI: ${AIModelManager.AIModel.OPENAI}")
             // 更新 AIService
             aiService = when (AIModelManager.currentModel.value) {
                 AIModelManager.AIModel.DEEPSEEK -> DeepSeekAIService(
