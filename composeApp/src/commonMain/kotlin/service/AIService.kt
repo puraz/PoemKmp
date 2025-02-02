@@ -18,8 +18,8 @@ data class AISearchResult(
     val content: String,
     val author: String,
     val dynasty: String?,
-    val category: String?,
-    val notes: String?,
+    val category: String? = null,
+    val notes: String? = null,
     val relevanceScore: Double,
     val matchReason: String,
     val isRecommendation: Boolean = false

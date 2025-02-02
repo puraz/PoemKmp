@@ -25,7 +25,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "诗词收藏",
-        state = rememberWindowState(size = DpSize(1130.dp, 800.dp))
+        state = rememberWindowState(size = DpSize(1200.dp, 800.dp))
     ) {
         Surface(modifier = Modifier.fillMaxSize()) {
             App()

@@ -13,10 +13,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ui.components.*
+import ui.components.AddPoemFab
+import ui.components.PoemDetail
+import ui.components.PoemEditDialog
+import ui.components.PoemListItem
 import viewmodel.AISearchViewModel
 import viewmodel.HomeViewModel
 import viewmodel.SearchViewModel
+
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel,
@@ -29,8 +33,8 @@ fun HomeScreen(
     Box(modifier = Modifier.fillMaxSize().background(colors.background)) {
         var searchText by remember { mutableStateOf("") }
         var showResults by remember { mutableStateOf(false) }
-        var isAISearch by remember { mutableStateOf(false) }  // 添加搜索模式状态
-        var hasAISearched by remember { mutableStateOf(false) }  // AI搜索状态标记
+        // var isAISearch by remember { mutableStateOf(false) }  // 注释AI搜索相关状态
+        // var hasAISearched by remember { mutableStateOf(false) }
         
         Row(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.weight(1f)) {
@@ -46,22 +50,15 @@ fun HomeScreen(
                         value = searchText,
                         onValueChange = { 
                             searchText = it
-                            if (!isAISearch) {  // 普通搜索模式下实时搜索
-                                if (it.isNotBlank()) {
-                                    searchViewModel.search(it)
-                                    showResults = true
-                                } else {
-                                    showResults = false
-                                }
-                            } else {  // AI搜索模式下，清空时重置状态
-                                if (it.isBlank()) {
-                                    hasAISearched = false
-                                    showResults = false
-                                }
+                            if (it.isNotBlank()) {
+                                searchViewModel.search(it)
+                                showResults = true
+                            } else {
+                                showResults = false
                             }
                         },
-                        label = { Text(if (isAISearch) "AI语义搜索" else "普通搜索") },
-                        placeholder = { Text(if (isAISearch) "输入描述进行语义搜索..." else "输入关键词搜索...") },
+                        label = { Text("搜索") },
+                        placeholder = { Text("输入关键词搜索...") },
                         leadingIcon = { 
                             Icon(
                                 Icons.Default.Search,
@@ -70,7 +67,6 @@ fun HomeScreen(
                             )
                         },
                         modifier = Modifier.weight(1f),
-                        enabled = !(isAISearch && aiSearchViewModel.isLoading.value),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             textColor = colors.onSurface,
                             placeholderColor = colors.onSurface.copy(alpha = 0.6f),
@@ -81,45 +77,6 @@ fun HomeScreen(
                             backgroundColor = colors.surface
                         )
                     )
-                    
-                    // 搜索模式切换按钮
-                    TextButton(
-                        onClick = { 
-                            isAISearch = !isAISearch
-                            searchText = ""  // 切换模式时清空搜索文本
-                            showResults = false
-                            hasAISearched = false
-                        },
-                        enabled = !aiSearchViewModel.isLoading.value,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = colors.primary,
-                            disabledContentColor = colors.onSurface.copy(alpha = 0.38f)
-                        )
-                    ) {
-                        Text(if (isAISearch) "切换普通搜索" else "切换AI搜索")
-                    }
-                    
-                    // AI搜索模式下显示搜索按钮
-                    if (isAISearch) {
-                        Button(
-                            onClick = {
-                                if (searchText.isNotBlank()) {
-                                    aiSearchViewModel.searchInSystem(searchText)
-                                    hasAISearched = true
-                                    showResults = true
-                                }
-                            },
-                            enabled = searchText.isNotBlank() && !aiSearchViewModel.isLoading.value,
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = colors.primary,
-                                contentColor = colors.onPrimary,
-                                disabledBackgroundColor = colors.onSurface.copy(alpha = 0.12f),
-                                disabledContentColor = colors.onSurface.copy(alpha = 0.38f)
-                            )
-                        ) {
-                            Text("搜索")
-                        }
-                    }
                 }
 
                 // 搜索结果或诗词列表
@@ -127,66 +84,33 @@ fun HomeScreen(
                     modifier = Modifier.weight(1f)
                         .background(colors.background)
                 ) {
-                    when {
-                        isAISearch && aiSearchViewModel.isLoading.value -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.Center),
-                                color = colors.primary
-                            )
-                        }
-                        isAISearch && showResults && hasAISearched -> {
-                            if (aiSearchViewModel.searchResults.value.isEmpty()) {
-                                // AI搜索无结果显示
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("未找到相关诗词")
-                                }
-                            } else {
-                                LazyColumn(
-                                    contentPadding = PaddingValues(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    items(aiSearchViewModel.searchResults.value) { result ->
-                                        AISearchResultCard(
-                                            result = result,
-                                            onAddToSystem = {}, // 系统内搜索不需要添加功能
-                                            onClick = {}
-                                        )
-                                    }
-                                }
+                    if (showResults) {
+                        // 普通搜索结果
+                        if (searchViewModel.searchResults.value.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("未找到相关诗词")
                             }
-                        }
-                        !isAISearch && showResults -> {
-                            // 普通搜索结果
-                            if (searchViewModel.searchResults.value.isEmpty()) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("未找到相关诗词")
-                                }
-                            } else {
-                                LazyColumn {
-                                    items(searchViewModel.searchResults.value) { poem ->
-                                        PoemListItem(
-                                            poem = poem,
-                                            onClick = { homeViewModel.onPoemSelected(poem) }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        else -> {
-                            // 显示原有的诗词列表
+                        } else {
                             LazyColumn {
-                                items(homeViewModel.poems.value) { poem ->
+                                items(searchViewModel.searchResults.value) { poem ->
                                     PoemListItem(
                                         poem = poem,
                                         onClick = { homeViewModel.onPoemSelected(poem) }
                                     )
                                 }
+                            }
+                        }
+                    } else {
+                        // 显示原有的诗词列表
+                        LazyColumn {
+                            items(homeViewModel.poems.value) { poem ->
+                                PoemListItem(
+                                    poem = poem,
+                                    onClick = { homeViewModel.onPoemSelected(poem) }
+                                )
                             }
                         }
                     }
