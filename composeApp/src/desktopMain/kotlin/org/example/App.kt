@@ -1,7 +1,7 @@
 package org.example
 
+import AppTheme
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -19,7 +19,7 @@ fun App() {
     val repository = remember { PoemRepository(databaseManager) }
     val viewModelFactory = remember { ViewModelFactory(repository) }
 
-    MaterialTheme {
+    AppTheme {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {

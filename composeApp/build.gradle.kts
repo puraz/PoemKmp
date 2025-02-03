@@ -120,6 +120,12 @@ compose.desktop {
         buildTypes.release.proguard {
             configurationFiles.from("compose-desktop.pro")
         }
+
+        // 添加字体资源
+        // jvmArgs += listOf(
+        //     "-Dfile.encoding=UTF-8",
+        //     "-Dprism.fontdir=resources/font"
+        // )
     }
 }
 
