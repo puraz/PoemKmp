@@ -2,6 +2,7 @@ package ui.components
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -37,19 +38,26 @@ fun PoemDetail(
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
         ) {
-            Text(
-                text = poem.title,
-                style = MaterialTheme.typography.h5.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp,
-                    lineHeight = 1.4.em
-                ),
-                color = colors.onSurface,
+            Box(
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 48.dp)
                     .align(Alignment.Center)
-                    .padding(horizontal = 48.dp),
-                textAlign = TextAlign.Center
-            )
+            ) {
+                SelectionContainer {
+                    Text(
+                        text = poem.title,
+                        style = MaterialTheme.typography.h5.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            lineHeight = 1.4.em
+                        ),
+                        color = colors.onSurface,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
             
             IconButton(
                 onClick = onFavoriteClick,
@@ -75,19 +83,23 @@ fun PoemDetail(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = poem.author,
-                style = MaterialTheme.typography.subtitle1.copy(
-                    letterSpacing = 1.sp
-                ),
-                color = colors.onSurface
-            )
-            poem.dynasty?.let { dynasty ->
-                Text(
-                    text = " · $dynasty",
-                    style = MaterialTheme.typography.subtitle1,
-                    color = colors.onSurface.copy(alpha = 0.7f)
-                )
+            SelectionContainer {
+                Row {
+                    Text(
+                        text = poem.author,
+                        style = MaterialTheme.typography.subtitle1.copy(
+                            letterSpacing = 1.sp
+                        ),
+                        color = colors.onSurface
+                    )
+                    poem.dynasty?.let { dynasty ->
+                        Text(
+                            text = " · $dynasty",
+                            style = MaterialTheme.typography.subtitle1,
+                            color = colors.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
             }
         }
         
@@ -111,55 +123,58 @@ fun PoemDetail(
                         .fillMaxSize()
                         .verticalScroll(scrollState)
                 ) {
-                    Text(
-                        text = poem.content,
-                        style = MaterialTheme.typography.body1.copy(
-                            lineHeight = 1.7.em,
-                            letterSpacing = 0.5.sp
-                        ),
-                        color = colors.onSurface,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 10.dp, horizontal = 5.dp),
-                        textAlign = TextAlign.Center
-                    )
-
-                    // 注释部分
-                    poem.notes?.let { notes ->
-                        Spacer(modifier = Modifier.height(32.dp))
-                        Divider(
-                            color = colors.onSurface.copy(alpha = 0.08f),
-                            // modifier = Modifier.width(120.dp),
-                            modifier = Modifier.fillMaxWidth(),
-                            thickness = 1.dp
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                    SelectionContainer {
+                        Column {
                             Text(
-                                text = "注释",
-                                style = MaterialTheme.typography.subtitle2.copy(
-                                    letterSpacing = 2.sp
+                                text = poem.content,
+                                style = MaterialTheme.typography.body1.copy(
+                                    lineHeight = 1.7.em,
+                                    letterSpacing = 0.5.sp
                                 ),
-                                color = colors.onSurface.copy(alpha = 0.7f),
-                                modifier = Modifier.padding(bottom = 12.dp)
-                            )
-                            Text(
-                                text = notes,
-                                style = MaterialTheme.typography.body2.copy(
-                                    lineHeight = 1.8.em
-                                ),
-                                color = colors.onSurface.copy(alpha = 0.8f),
-                                textAlign = TextAlign.Start,
+                                color = colors.onSurface,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 16.dp)
+                                    .padding(vertical = 10.dp, horizontal = 5.dp),
+                                textAlign = TextAlign.Center
                             )
+
+                            // 注释部分
+                            poem.notes?.let { notes ->
+                                Spacer(modifier = Modifier.height(32.dp))
+                                Divider(
+                                    color = colors.onSurface.copy(alpha = 0.08f),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    thickness = 1.dp
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "注释",
+                                        style = MaterialTheme.typography.subtitle2.copy(
+                                            letterSpacing = 2.sp
+                                        ),
+                                        color = colors.onSurface.copy(alpha = 0.7f),
+                                        modifier = Modifier.padding(bottom = 12.dp)
+                                    )
+                                    Text(
+                                        text = notes,
+                                        style = MaterialTheme.typography.body2.copy(
+                                            lineHeight = 1.8.em
+                                        ),
+                                        color = colors.onSurface.copy(alpha = 0.8f),
+                                        textAlign = TextAlign.Start,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 16.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
