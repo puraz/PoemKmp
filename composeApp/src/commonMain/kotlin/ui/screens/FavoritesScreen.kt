@@ -8,6 +8,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -15,11 +16,15 @@ import androidx.compose.ui.unit.dp
 import ui.components.LoadingIndicator
 import ui.components.PoemDetail
 import ui.components.PoemListItem
-import viewmodel.FavoritesViewModel
+import viewmodel.ViewModelFactory
 
 @Composable
-fun FavoritesScreen(viewModel: FavoritesViewModel) {
+fun FavoritesScreen(
+    viewModelFactory: ViewModelFactory,
+    modifier: Modifier = Modifier
+) {
     val colors = MaterialTheme.colors // 获取当前主题颜色
+    val viewModel = remember { viewModelFactory.createFavoritesViewModel() }
 
     Box(modifier = Modifier.fillMaxSize().background(colors.background)) {
         when {
@@ -102,7 +107,8 @@ fun FavoritesScreen(viewModel: FavoritesViewModel) {
                         viewModel.selectedPoem.value?.let { poem ->
                             PoemDetail(
                                 poem = poem,
-                                onFavoriteClick = { viewModel.toggleFavorite(poem) }
+                                onFavoriteClick = { viewModel.toggleFavorite(poem) },
+                                viewModelFactory = viewModelFactory
                             )
                         }
                     }

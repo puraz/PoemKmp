@@ -23,8 +23,6 @@ fun MainScreen(viewModelFactory: ViewModelFactory, databaseManager: DatabaseMana
     AIModelManager.initialize(databaseManager)
     
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
-    val homeViewModel = remember { viewModelFactory.createHomeViewModel() }
-    val searchViewModel = remember { viewModelFactory.createSearchViewModel() }
     val aiSearchViewModel = remember { viewModelFactory.createAISearchViewModel() }
     val isDarkTheme = ThemeManager.isDarkTheme
     
@@ -51,12 +49,10 @@ fun MainScreen(viewModelFactory: ViewModelFactory, databaseManager: DatabaseMana
             ) {
                 when (currentScreen) {
                     Screen.Home -> HomeScreen(
-                        homeViewModel = homeViewModel,
-                        searchViewModel = searchViewModel,
-                        aiSearchViewModel = aiSearchViewModel
+                        viewModelFactory = viewModelFactory
                     )
                     Screen.Favorites -> FavoritesScreen(
-                        viewModel = remember { viewModelFactory.createFavoritesViewModel() }
+                        viewModelFactory = viewModelFactory
                     )
                     // Screen.Categories -> CategoriesScreen()
                     // Screen.Tags -> TagsScreen()

@@ -17,15 +17,11 @@ import ui.components.AddPoemFab
 import ui.components.PoemDetail
 import ui.components.PoemEditDialog
 import ui.components.PoemListItem
-import viewmodel.AISearchViewModel
-import viewmodel.HomeViewModel
-import viewmodel.SearchViewModel
+import viewmodel.ViewModelFactory
 
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel,
-    searchViewModel: SearchViewModel,
-    aiSearchViewModel: AISearchViewModel,
+    viewModelFactory: ViewModelFactory,
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colors // 获取当前主题颜色
@@ -33,8 +29,9 @@ fun HomeScreen(
     Box(modifier = Modifier.fillMaxSize().background(colors.background)) {
         var searchText by remember { mutableStateOf("") }
         var showResults by remember { mutableStateOf(false) }
-        // var isAISearch by remember { mutableStateOf(false) }  // 注释AI搜索相关状态
-        // var hasAISearched by remember { mutableStateOf(false) }
+        val homeViewModel = remember { viewModelFactory.createHomeViewModel() }
+        val searchViewModel = remember { viewModelFactory.createSearchViewModel() }
+        // val aiSearchViewModel = remember { viewModelFactory.createAISearchViewModel() }
         
         Row(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.weight(1f)) {
@@ -149,7 +146,8 @@ fun HomeScreen(
 
                         PoemDetail(
                             poem = poem,
-                            onFavoriteClick = { homeViewModel.toggleFavorite(poem) }
+                            onFavoriteClick = { homeViewModel.toggleFavorite(poem) },
+                            viewModelFactory = viewModelFactory
                         )
                     }
                 }

@@ -13,6 +13,9 @@ class ViewModelFactory(
     fun createHomeViewModel(): HomeViewModel = HomeViewModel(repository)
     fun createFavoritesViewModel(): FavoritesViewModel = FavoritesViewModel(repository)
     fun createSearchViewModel(): SearchViewModel = SearchViewModel(repository)
+    fun createPoemAppreciationViewModel(): PoemAppreciationViewModel = PoemAppreciationViewModel(
+        aiService = createAIService()
+    )
     fun createAISearchViewModel(): AISearchViewModel = AISearchViewModel(
         poemRepository = repository,
         aiService = createAIService()

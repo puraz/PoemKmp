@@ -9,7 +9,8 @@ data class Poetry(
     val createTime: Long = System.currentTimeMillis(),
     val updateTime: Long = System.currentTimeMillis(),
     val notes: String? = null,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val appreciation: String? = null  // 添加鉴赏字段
 )
 
 enum class Category {

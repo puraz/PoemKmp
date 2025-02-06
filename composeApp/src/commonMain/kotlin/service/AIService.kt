@@ -33,4 +33,4 @@ data class PoemAnalysis(
     val culturalContext: String,
     val literaryDevices: List<String>,
     val emotions: List<String>
-) 
+)

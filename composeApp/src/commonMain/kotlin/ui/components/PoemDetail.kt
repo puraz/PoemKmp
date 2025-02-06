@@ -1,13 +1,15 @@
 package ui.components
 
+import PoemAppreciationDialog
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -16,15 +18,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import data.db.Poem_entity
+import viewmodel.ViewModelFactory
 
 @Composable
 fun PoemDetail(
     poem: Poem_entity,
     onFavoriteClick: () -> Unit,
+    viewModelFactory: ViewModelFactory,
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colors
-    
+    var showAppreciation by remember { mutableStateOf(false) }
+
+    // 创建 PoemAppreciationViewModel
+    val poemAppreciationViewModel = remember {
+        viewModelFactory.createPoemAppreciationViewModel()
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -72,6 +82,27 @@ fun PoemDetail(
                     tint = if (poem.is_favorite > 0) colors.primary 
                           else colors.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.size(28.dp)
+                )
+            }
+
+            // 在工具栏中添加鉴赏按钮
+            IconButton(
+                onClick = { showAppreciation = true },
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Analytics,
+                    contentDescription = "诗词鉴赏",
+                    tint = MaterialTheme.colors.primary
+                )
+            }
+
+            // 显示鉴赏对话框
+            if (showAppreciation) {
+                PoemAppreciationDialog(
+                    poem = poem,
+                    onDismiss = { showAppreciation = false },
+                    poemAppreciationViewModel
                 )
             }
         }
