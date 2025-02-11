@@ -51,6 +51,8 @@ kotlin {
 
             // Material 图标库
             implementation(compose.materialIconsExtended)
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,12 +89,21 @@ fun PoemDetail(
             // 在工具栏中添加鉴赏按钮
             IconButton(
                 onClick = { showAppreciation = true },
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .size(48.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Analytics,
-                    contentDescription = "诗词鉴赏",
-                    tint = MaterialTheme.colors.primary
+                    imageVector = if (poem.appreciation_content.isNullOrBlank())
+                        Icons.Outlined.Analytics
+                    else Icons.Filled.Analytics,
+                    contentDescription = if (poem.appreciation_content.isNullOrBlank())
+                        "生成诗词鉴赏"
+                    else "查看诗词鉴赏",
+                    tint = if (poem.appreciation_content.isNullOrBlank())
+                        colors.onSurface.copy(alpha = 0.6f)
+                    else colors.primary,
+                    modifier = Modifier.size(28.dp)
                 )
             }
 

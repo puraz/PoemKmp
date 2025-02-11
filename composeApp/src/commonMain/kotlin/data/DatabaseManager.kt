@@ -5,14 +5,12 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.db.SqlDriver
 import data.db.PoemDatabase
 import data.db.Poem_entity
-import data.db.Tag_entity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 
 class DatabaseManager(private val driver: SqlDriver) {
     private val database = PoemDatabase(driver)
     private val poemQueries = database.poemEntityQueries
-    private val tagQueries = database.tagEntityQueries
     internal val settingsQueries = database.settingsEntityQueries
     // 诗词相关操作
     fun getAllPoems(): Flow<List<Poem_entity>> =
@@ -75,23 +73,6 @@ class DatabaseManager(private val driver: SqlDriver) {
         poemQueries.deletePoetry(id)
     }
 
-    // 标签相关操作
-    fun getTagsForPoem(poemId: Long): Flow<List<Tag_entity>> =
-        tagQueries.getTagsForPoetry(poemId)
-            .asFlow()
-            .mapToList(Dispatchers.IO)
-
-    suspend fun addTagToPoem(poemId: Long, tagName: String) {
-        database.transaction {
-            // 先插入标签（如果不存在）
-            tagQueries.insertTag(tagName)
-            // 获取标签ID
-            val tagId = tagQueries.selectByName(tagName).executeAsOne().id
-            // 添加关联
-            tagQueries.addTagToPoetry(poemId, tagId)
-        }
-    }
-
     fun getFavoritePoems(): Flow<List<Poem_entity>> =
         poemQueries.selectFavorites()
             .asFlow()
@@ -102,6 +83,18 @@ class DatabaseManager(private val driver: SqlDriver) {
         poemQueries.updateFavoriteStatus(
             is_favorite = if (isFavorite) 1L else 0L,
             update_time = currentTime,
+            id = id
+        )
+    }
+
+    fun updateAppreciation(
+        appreciationContent: String,
+        updateTime: Long,
+        id: Long
+    ) {
+        database.poemEntityQueries.updateAppreciation(
+            appreciation_content = appreciationContent,
+            update_time = updateTime,
             id = id
         )
     }

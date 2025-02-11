@@ -4,6 +4,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,12 +27,31 @@ fun PoemAppreciationDialog(
     val appreciationState by viewModel.appreciationState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.analyzePoem(poem)
+        viewModel.loadOrAnalyzePoem(poem)
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("诗词鉴赏") },
+        title = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("诗词鉴赏")
+                if (appreciationState is AppreciationState.Success) {
+                    IconButton(
+                        onClick = { viewModel.reanalyzePoem(poem) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "重新赏析",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+                }
+            }
+        },
         text = {
             Box(
                 modifier = Modifier

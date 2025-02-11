@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -13,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import ui.components.LoadingIndicator
 import ui.components.PoemDetail
 import ui.components.PoemListItem
 import viewmodel.ViewModelFactory
@@ -23,19 +23,17 @@ fun FavoritesScreen(
     viewModelFactory: ViewModelFactory,
     modifier: Modifier = Modifier
 ) {
-    val colors = MaterialTheme.colors // 获取当前主题颜色
     val viewModel = remember { viewModelFactory.createFavoritesViewModel() }
 
-    Box(modifier = Modifier.fillMaxSize().background(colors.background)) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background)) {
         when {
             viewModel.isLoading.value -> {
-                // 使用自定义的加载指示器
-                LoadingIndicator(
-                    modifier = Modifier.fillMaxSize()
+                CircularProgressIndicator(
+                    modifier = Modifier.size(48.dp).align(Alignment.Center),
+                    color = MaterialTheme.colors.primary
                 )
             }
             viewModel.favoritePoems.value.isEmpty() -> {
-                // 空状态显示
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,

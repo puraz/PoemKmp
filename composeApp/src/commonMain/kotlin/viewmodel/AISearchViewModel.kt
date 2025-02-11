@@ -7,7 +7,9 @@ import data.db.Poem_entity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import manager.AIModelManager
-import service.*
+import service.AISearchResult
+import service.AIService
+import service.DeepSeekAIService
 
 class AISearchViewModel(
     private val poemRepository: PoemRepository,
@@ -23,13 +25,13 @@ class AISearchViewModel(
                     apiKey = AIModelManager.getApiKey()
                 )
 
-                AIModelManager.AIModel.OPENAI -> OpenAIService(
-                    apiKey = AIModelManager.getApiKey()
-                )
-
-                AIModelManager.AIModel.GEMINI -> GeminiAIService(
-                    apiKey = AIModelManager.getApiKey()
-                )
+                // AIModelManager.AIModel.OPENAI -> OpenAIService(
+                //     apiKey = AIModelManager.getApiKey()
+                // )
+                //
+                // AIModelManager.AIModel.GEMINI -> GeminiAIService(
+                //     apiKey = AIModelManager.getApiKey()
+                // )
             }
         }
     }
@@ -98,7 +100,8 @@ class AISearchViewModel(
                     notes = aiResult.notes,
                     create_time = System.currentTimeMillis(),
                     update_time = System.currentTimeMillis(),
-                    is_favorite = 0
+                    is_favorite = 0,
+                    appreciation_content = null
                 )
                 poemRepository.addPoem(
                     title = poem.title,

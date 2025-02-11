@@ -1,8 +1,9 @@
 package data
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import data.db.Poem_entity as PoemEntity
-import data.db.Tag_entity as TagEntity
 
 class PoemRepository(private val databaseManager: DatabaseManager) {
     fun getAllPoems(): Flow<List<PoemEntity>> =
@@ -56,17 +57,24 @@ class PoemRepository(private val databaseManager: DatabaseManager) {
         databaseManager.deletePoem(id)
     }
 
-    fun getTagsForPoem(poemId: Long): Flow<List<TagEntity>> =
-        databaseManager.getTagsForPoem(poemId)
-
-    suspend fun addTagToPoem(poemId: Long, tagName: String) {
-        databaseManager.addTagToPoem(poemId, tagName)
-    }
-
     suspend fun getFavoritePoems(): Flow<List<PoemEntity>> =
         databaseManager.getFavoritePoems()
 
     suspend fun toggleFavorite(id: Long, isFavorite: Boolean) {
         databaseManager.toggleFavorite(id, isFavorite)
+    }
+
+    suspend fun updateAppreciation(
+        poemId: Long,
+        appreciationContent: String,
+        updateTime: Long
+    ) {
+        withContext(Dispatchers.IO) {
+            databaseManager.updateAppreciation(
+                appreciationContent = appreciationContent,
+                updateTime = updateTime,
+                id = poemId
+            )
+        }
     }
 } 

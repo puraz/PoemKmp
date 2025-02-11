@@ -8,7 +8,8 @@ CREATE TABLE poem_entity (
     create_time INTEGER NOT NULL,
     update_time INTEGER NOT NULL,
     notes TEXT,
-    is_favorite INTEGER NOT NULL DEFAULT 0
+    is_favorite INTEGER NOT NULL DEFAULT 0,
+    appreciation_content TEXT
 );
 
 -- 查询所有诗词
@@ -33,7 +34,9 @@ WHERE title LIKE '%' || ? || '%';
 selectFavorites:
 SELECT *
 FROM poem_entity
-WHERE is_favorite = 1;
+WHERE is_favorite = 1
+ORDER BY update_time DESC;
+
 
 -- 按分类查询
 selectByCategory:
@@ -78,3 +81,10 @@ updateFavoriteStatus:
 UPDATE poem_entity
 SET is_favorite = ?, update_time = ?
 WHERE id = ?; 
+
+-- 更新诗词赏析内容
+updateAppreciation:
+UPDATE poem_entity
+SET appreciation_content = ?,
+    update_time = ?
+WHERE id = ?;
