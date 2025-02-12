@@ -25,6 +25,13 @@ fun AISearchPanel(
     var searchText by remember { mutableStateOf("") }
     var showAddSuccessSnackbar by remember { mutableStateOf(false) }
     var hasSearched by remember { mutableStateOf(false) }
+
+    // 添加输入校验函数
+    fun isValidSearchText(text: String): Boolean {
+        // 检查是否包含英文字母或数字
+        val containsEnglishOrDigits = text.any { it.isLetterOrDigit() && it !in '一'..'龥' }
+        return !containsEnglishOrDigits
+    }
     
     Box(
         modifier = modifier
@@ -72,8 +79,13 @@ fun AISearchPanel(
                             keyboardActions = KeyboardActions(
                                 onSearch = {
                                     if (searchText.isNotBlank() && !viewModel.isLoading.value) {
-                                        hasSearched = true
-                                        viewModel.searchOutsideSystem(searchText)
+                                        if (isValidSearchText(searchText)) {
+                                            hasSearched = true
+                                            viewModel.searchOutsideSystem(searchText)
+                                        } else {
+                                            hasSearched = true
+                                            viewModel.clearSearchResults()
+                                        }
                                     }
                                 }
                             )
@@ -82,8 +94,13 @@ fun AISearchPanel(
                         Button(
                             onClick = {
                                 if (searchText.isNotBlank()) {
-                                    hasSearched = true
-                                    viewModel.searchOutsideSystem(searchText)
+                                    if (isValidSearchText(searchText)) {
+                                        hasSearched = true
+                                        viewModel.searchOutsideSystem(searchText)
+                                    } else {
+                                        hasSearched = true
+                                        viewModel.clearSearchResults()
+                                    }
                                 }
                             },
                             enabled = searchText.isNotBlank() && !viewModel.isLoading.value  // 搜索时禁用按钮
