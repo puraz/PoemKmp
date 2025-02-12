@@ -92,14 +92,19 @@ fun NavigationDrawerContent(
 
     // 搜索对话框
     if (showSearchDialog) {
-        AlertDialog(
+        AISearchDialog(
+            onDismiss = { showSearchDialog = false },
+            viewModel = aiSearchViewModel,
+            onPoemSelected = { /* 暂时不需要处理 */ }
+        )
+        /*AlertDialog(
             onDismissRequest = { showSearchDialog = false },
             title = { Text("发现新诗词") },
             text = {
                 Box(modifier = Modifier.size(800.dp, 600.dp)) {
                     AISearchPanel(
                         viewModel = aiSearchViewModel,
-                        onPoemSelected = { /* 暂时不需要处理 */ },
+                        onPoemSelected = { *//* 暂时不需要处理 *//* },
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -109,6 +114,6 @@ fun NavigationDrawerContent(
                     Text("关闭")
                 }
             }
-        )
+        )*/
     }
 }

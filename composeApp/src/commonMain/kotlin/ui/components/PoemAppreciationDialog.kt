@@ -2,6 +2,7 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -13,6 +14,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import data.db.Poem_entity
 import service.PoemAnalysis
 import viewmodel.AppreciationState
@@ -30,89 +33,101 @@ fun PoemAppreciationDialog(
         viewModel.loadOrAnalyzePoem(poem)
     }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("诗词鉴赏")
-                if (appreciationState is AppreciationState.Success) {
-                    IconButton(
-                        onClick = { viewModel.reanalyzePoem(poem) }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "重新赏析",
-                            tint = MaterialTheme.colors.primary
-                        )
-                    }
-                }
-            }
-        },
-        text = {
-            Box(
-                modifier = Modifier
-                    .width(800.dp)
-                    .heightIn(max = 600.dp)
-                    .padding(vertical = 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                when (val state = appreciationState) {
-                    is AppreciationState.Loading -> {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colors.primary,
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-
-                    is AppreciationState.Success -> {
-                        val scrollState = rememberScrollState()
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = 600.dp) // 继承外层高度限制
+        properties = DialogProperties(usePlatformDefaultWidth = false) // 重要：允许自定义宽度
+    ) {
+        Surface(
+            // 使用 Surface 或 Card 来提供背景和阴影
+            modifier = Modifier
+                .fillMaxWidth(0.8f) // 或固定宽度 .width(800.dp)
+                .fillMaxHeight(0.8f),  // 限制最大高度,
+            shape = RoundedCornerShape(6.dp), // 圆角
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("诗词鉴赏", style = MaterialTheme.typography.body2)
+                    if (appreciationState is AppreciationState.Success) {
+                        IconButton(
+                            onClick = { viewModel.reanalyzePoem(poem) }
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(scrollState) // 外层滚动
-                                    .padding(end = 12.dp) // 为滚动条留出空间
-                            ) {
-                                AppreciationContent(
-                                    analysis = state.analysis,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
-
-                            VerticalScrollbar(
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .fillMaxHeight(),
-                                adapter = rememberScrollbarAdapter(scrollState) // 共享滚动状态
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "重新赏析",
+                                tint = MaterialTheme.colors.primary
                             )
                         }
                     }
+                }
+                // 内容和滚动
+                Box(
+                    modifier = Modifier
+                        .weight(1f) // 占据剩余空间
+                        .padding(horizontal = 16.dp), // 左右边距
+                    contentAlignment = Alignment.Center
+                ) {
+                    when (val state = appreciationState) {
+                        is AppreciationState.Loading -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    color = MaterialTheme.colors.primary
+                                )
+                            }
+                        }
 
-                    is AppreciationState.Error -> {
-                        ErrorContent(
-                            message = state.message
-                        )
+                        is AppreciationState.Success -> {
+                            val scrollState = rememberScrollState()
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .verticalScroll(scrollState)
+                                ) {
+                                    AppreciationContent(analysis = state.analysis)
+                                }
+                                VerticalScrollbar(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .fillMaxHeight(),
+                                    adapter = rememberScrollbarAdapter(scrollState)
+                                )
+                            }
+                        }
+
+                        is AppreciationState.Error -> {
+                            ErrorContent(
+                                message = state.message,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+
+                        else -> {}
                     }
+                }
 
-                    else -> {}
+                // 关闭按钮
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("关闭")
+                    }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("关闭")
-            }
         }
-    )
+    }
 }
 
 @Composable
