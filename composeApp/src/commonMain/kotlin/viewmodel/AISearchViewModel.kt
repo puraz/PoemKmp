@@ -10,6 +10,7 @@ import manager.AIModelManager
 import service.AISearchResult
 import service.AIService
 import service.DeepSeekAIService
+import service.GeminiAIService
 
 class AISearchViewModel(
     private val poemRepository: PoemRepository,
@@ -29,9 +30,9 @@ class AISearchViewModel(
                 //     apiKey = AIModelManager.getApiKey()
                 // )
                 //
-                // AIModelManager.AIModel.GEMINI -> GeminiAIService(
-                //     apiKey = AIModelManager.getApiKey()
-                // )
+                AIModelManager.AIModel.GEMINI -> GeminiAIService(
+                    apiKey = AIModelManager.getApiKey()
+                )
             }
         }
     }

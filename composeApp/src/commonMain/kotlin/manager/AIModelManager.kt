@@ -30,7 +30,7 @@ object AIModelManager {
     enum class AIModel(val displayName: String, val configKey: String) {
         DEEPSEEK("DeepSeek", "deepseek_api_key"),
         // OPENAI("OpenAI", "openai_api_key"),
-        // GEMINI("Google Gemini", "gemini_api_key")
+        GEMINI("Google Gemini", "gemini_api_key")
     }
 
     fun setModel(model: AIModel) {

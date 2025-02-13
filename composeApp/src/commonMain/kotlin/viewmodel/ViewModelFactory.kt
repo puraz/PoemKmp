@@ -4,6 +4,7 @@ import data.PoemRepository
 import manager.AIModelManager
 import service.AIService
 import service.DeepSeekAIService
+import service.GeminiAIService
 
 class ViewModelFactory(
     private val repository: PoemRepository
@@ -31,9 +32,9 @@ class ViewModelFactory(
             //     apiKey = AIModelManager.getApiKey()
             // )
             //
-            // AIModelManager.AIModel.GEMINI -> GeminiAIService(
-            //     apiKey = AIModelManager.getApiKey()
-            // )
+            AIModelManager.AIModel.GEMINI -> GeminiAIService(
+                apiKey = AIModelManager.getApiKey()
+            )
         }
     }
 }

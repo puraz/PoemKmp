@@ -8,7 +8,8 @@ import kotlinx.serialization.Serializable
 
 class GeminiAIService(
     private val apiKey: String,
-    private val baseUrl: String = "https://generativelanguage.googleapis.com/v1beta"
+    // private val baseUrl: String = "https://generativelanguage.googleapis.com/v1beta"
+    private val baseUrl: String = "https://api-proxy.me/gemini/v1beta"
 ) : BaseAIService(), AIService {
 
     @Serializable
@@ -75,14 +76,9 @@ class GeminiAIService(
     ): List<AISearchResult> = withRetry {
         try {
             val systemPrompt = createSystemPrompt(query)
-            val userPrompt = if (poems.isEmpty()) {
-                "推荐古诗词，返回 JSON 数组，包含 title, content, author, dynasty, relevanceScore, matchReason 字段。"
-            } else {
-                "分析诗词相关度：\n" +
-                poems.joinToString("\n") { "${it.title} - ${it.author}：${it.content}" }
-            }
+            val userPrompt = createUserPrompt(query, poems)
 
-            val response = client.post("$baseUrl/models/gemini-1.5-flash:generateContent?key=$apiKey") {
+            val response = client.post("$baseUrl/models/gemini-2.0-flash:generateContent?key=$apiKey") {
                 contentType(ContentType.Application.Json)
                 setBody(GeminiRequest(
                     contents = listOf(
@@ -136,19 +132,7 @@ class GeminiAIService(
 
     override suspend fun analyzePoemContent(poem: Poem_entity): PoemAnalysis = withRetry {
         try {
-            val prompt = """
-                分析这首诗：
-                《${poem.title}》 - ${poem.author}
-                ${poem.content}
-                
-                请以 JSON 格式返回分析结果，必须包含以下字段：
-                - theme: 主题思想
-                - style: 写作风格
-                - interpretation: 诗歌赏析
-                - culturalContext: 文化背景
-                - literaryDevices: 写作手法数组
-                - emotions: 情感特征数组
-            """.trimIndent()
+            val prompt = createAnalysisPrompt(poem)
 
             val response = client.post("$baseUrl/models/gemini-pro:generateContent?key=$apiKey") {
                 contentType(ContentType.Application.Json)
