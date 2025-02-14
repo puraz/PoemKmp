@@ -1,5 +1,6 @@
 package viewmodel
 
+import AIServiceFactory
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import data.PoemRepository
@@ -9,8 +10,6 @@ import kotlinx.coroutines.launch
 import manager.AIModelManager
 import service.AISearchResult
 import service.AIService
-import service.DeepSeekAIService
-import service.GeminiAIService
 
 class AISearchViewModel(
     private val poemRepository: PoemRepository,
@@ -19,21 +18,9 @@ class AISearchViewModel(
     init {
         // 监听 AI 模型变化
         AIModelManager.addModelChangeListener {
-            // println("AIModelManager.AIModel.OPENAI: ${AIModelManager.AIModel.OPENAI}")
-            // 更新 AIService
-            aiService = when (AIModelManager.currentModel.value) {
-                AIModelManager.AIModel.DEEPSEEK -> DeepSeekAIService(
-                    apiKey = AIModelManager.getApiKey()
-                )
-
-                // AIModelManager.AIModel.OPENAI -> OpenAIService(
-                //     apiKey = AIModelManager.getApiKey()
-                // )
-                //
-                AIModelManager.AIModel.GEMINI -> GeminiAIService(
-                    apiKey = AIModelManager.getApiKey()
-                )
-            }
+            val currentModel = AIModelManager.currentModel.value
+            val aiService = AIServiceFactory.createService(currentModel)
+            this.aiService = aiService
         }
     }
 

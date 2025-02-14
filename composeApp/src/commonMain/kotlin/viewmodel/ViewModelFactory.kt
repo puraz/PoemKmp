@@ -1,10 +1,8 @@
 package viewmodel
 
+import AIServiceFactory
 import data.PoemRepository
 import manager.AIModelManager
-import service.AIService
-import service.DeepSeekAIService
-import service.GeminiAIService
 
 class ViewModelFactory(
     private val repository: PoemRepository
@@ -13,28 +11,11 @@ class ViewModelFactory(
     fun createFavoritesViewModel(): FavoritesViewModel = FavoritesViewModel(repository)
     fun createSearchViewModel(): SearchViewModel = SearchViewModel(repository)
     fun createPoemAppreciationViewModel(): PoemAppreciationViewModel = PoemAppreciationViewModel(
-        aiService = createAIService(),
+        aiService = AIServiceFactory.createService(AIModelManager.currentModel.value),
         poemRepository = repository
     )
     fun createAISearchViewModel(): AISearchViewModel = AISearchViewModel(
         poemRepository = repository,
-        aiService = createAIService()
+        aiService = AIServiceFactory.createService(AIModelManager.currentModel.value)
     )
-
-    // 后备方法，以防 currentAIService 为空
-    private fun createAIService(): AIService {
-        return when (AIModelManager.currentModel.value) {
-            AIModelManager.AIModel.DEEPSEEK -> DeepSeekAIService(
-                apiKey = AIModelManager.getApiKey()
-            )
-
-            // AIModelManager.AIModel.OPENAI -> OpenAIService(
-            //     apiKey = AIModelManager.getApiKey()
-            // )
-            //
-            AIModelManager.AIModel.GEMINI -> GeminiAIService(
-                apiKey = AIModelManager.getApiKey()
-            )
-        }
-    }
 }

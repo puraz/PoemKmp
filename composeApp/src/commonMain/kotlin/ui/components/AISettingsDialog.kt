@@ -13,8 +13,10 @@ fun AISettingsDialog(
     onDismiss: () -> Unit
 ) {
     var selectedModel by remember { mutableStateOf(AIModelManager.currentModel.value) }
-    var apiKey by remember { mutableStateOf(AIModelManager.getApiKey()) }
-    
+    var modelConfig by remember {
+        mutableStateOf(AIModelManager.getModelConfig(selectedModel))
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("AI 模型设置") },
@@ -39,7 +41,10 @@ fun AISettingsDialog(
                     ) {
                         RadioButton(
                             selected = selectedModel == model,
-                            onClick = { selectedModel = model }
+                            onClick = {
+                                selectedModel = model
+                                modelConfig = AIModelManager.getModelConfig(model)
+                            }
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(model.displayName)
@@ -50,9 +55,31 @@ fun AISettingsDialog(
                 
                 // API Key 输入
                 OutlinedTextField(
-                    value = apiKey,
-                    onValueChange = { apiKey = it },
+                    value = modelConfig.apiKey,
+                    onValueChange = { modelConfig = modelConfig.copy(apiKey = it) },
                     label = { Text("API Key") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Base URL 输入
+                OutlinedTextField(
+                    value = modelConfig.baseUrl,
+                    onValueChange = { modelConfig = modelConfig.copy(baseUrl = it) },
+                    label = { Text("API 基础链接") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 模型版本输入
+                OutlinedTextField(
+                    value = modelConfig.modelVersion,
+                    onValueChange = { modelConfig = modelConfig.copy(modelVersion = it) },
+                    label = { Text("模型版本") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -63,7 +90,6 @@ fun AISettingsDialog(
                 Text(
                     text = when (selectedModel) {
                         AIModelManager.AIModel.DEEPSEEK -> "DeepSeek API Key 获取方式：访问 https://platform.deepseek.com"
-                        // AIModelManager.AIModel.OPENAI -> "OpenAI API Key 获取方式：访问 https://platform.openai.com"
                         AIModelManager.AIModel.GEMINI -> "Gemini API Key 获取方式：访问 https://ai.google.dev"
                     },
                     style = MaterialTheme.typography.caption,
@@ -74,11 +100,11 @@ fun AISettingsDialog(
         confirmButton = {
             Button(
                 onClick = {
+                    AIModelManager.saveModelConfig(selectedModel, modelConfig)
                     AIModelManager.setModel(selectedModel)
-                    AIModelManager.setApiKey(apiKey)
                     onDismiss()
                 },
-                enabled = apiKey.isNotBlank()
+                enabled = modelConfig.apiKey.isNotBlank()
             ) {
                 Text("确定")
             }

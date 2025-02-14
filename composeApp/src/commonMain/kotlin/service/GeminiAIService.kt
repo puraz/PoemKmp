@@ -8,14 +8,14 @@ import kotlinx.serialization.Serializable
 
 class GeminiAIService(
     private val apiKey: String,
-    // private val baseUrl: String = "https://generativelanguage.googleapis.com/v1beta"
-    private val baseUrl: String = "https://api-proxy.me/gemini/v1beta"
+    private val baseUrl: String,
+    private val modelVersion: String
 ) : BaseAIService(), AIService {
 
     @Serializable
     private data class GeminiRequest(
         val contents: List<Content>,
-        val generationConfig: GenerationConfig = GenerationConfig()
+        val generationConfig: GenerationConfig = GenerationConfig(),
     ) {
         @Serializable
         data class Content(
@@ -78,7 +78,7 @@ class GeminiAIService(
             val systemPrompt = createSystemPrompt(query)
             val userPrompt = createUserPrompt(query, poems)
 
-            val response = client.post("$baseUrl/models/gemini-2.0-flash:generateContent?key=$apiKey") {
+            val response = client.post("$baseUrl/models/$modelVersion:generateContent?key=$apiKey") {
                 contentType(ContentType.Application.Json)
                 setBody(GeminiRequest(
                     contents = listOf(
@@ -134,12 +134,12 @@ class GeminiAIService(
         try {
             val prompt = createAnalysisPrompt(poem)
 
-            val response = client.post("$baseUrl/models/gemini-pro:generateContent?key=$apiKey") {
+            val response = client.post("$baseUrl/models/$modelVersion:generateContent?key=$apiKey") {
                 contentType(ContentType.Application.Json)
                 setBody(GeminiRequest(
                     contents = listOf(
                         GeminiRequest.Content("user", listOf(GeminiRequest.Part(prompt)))
-                    )
+                    ),
                 ))
             }
 

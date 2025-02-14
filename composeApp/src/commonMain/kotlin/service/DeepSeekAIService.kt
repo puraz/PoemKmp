@@ -8,12 +8,13 @@ import kotlinx.serialization.Serializable
 
 class DeepSeekAIService(
     private val apiKey: String,
-    private val baseUrl: String = "https://api.deepseek.com/v1"
+    private val baseUrl: String,
+    private val modelVersion: String
 ) : BaseAIService(), AIService {
     
     @Serializable
     private data class ChatRequest(
-        val model: String = "deepseek-chat",
+        val model: String,
         val messages: List<Message>,
         val frequency_penalty: Int = 0,
         val max_tokens: Int = 4096,
@@ -107,6 +108,7 @@ class DeepSeekAIService(
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $apiKey")
                 setBody(ChatRequest(
+                    model = modelVersion,
                     messages = listOf(
                         Message("system", systemPrompt),
                         Message("user", userPrompt)
@@ -157,6 +159,7 @@ class DeepSeekAIService(
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $apiKey")
                 setBody(ChatRequest(
+                    model = modelVersion,
                     messages = listOf(Message("user", prompt))
                 ))
             }

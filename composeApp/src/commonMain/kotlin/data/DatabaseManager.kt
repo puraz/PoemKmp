@@ -98,4 +98,28 @@ class DatabaseManager(private val driver: SqlDriver) {
             id = id
         )
     }
+
+    // 获取模型配置
+    fun getModelConfig(modelName: String): Triple<String?, String?, String?> {
+        return Triple(
+            settingsQueries.selectByKey("api_key_$modelName").executeAsOneOrNull(),
+            settingsQueries.selectByKey("base_url_$modelName").executeAsOneOrNull(),
+            settingsQueries.selectByKey("model_version_$modelName").executeAsOneOrNull()
+        )
+    }
+
+    // 保存模型配置
+    fun saveModelConfig(
+        modelName: String,
+        apiKey: String,
+        baseUrl: String,
+        modelVersion: String
+    ) {
+        val currentTime = System.currentTimeMillis()
+        database.transaction {
+            settingsQueries.upsertSetting("api_key_$modelName", apiKey, currentTime)
+            settingsQueries.upsertSetting("base_url_$modelName", baseUrl, currentTime)
+            settingsQueries.upsertSetting("model_version_$modelName", modelVersion, currentTime)
+        }
+    }
 } 
