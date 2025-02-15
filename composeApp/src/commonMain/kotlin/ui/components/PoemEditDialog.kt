@@ -1,7 +1,10 @@
 package ui.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -67,14 +70,14 @@ fun PoemEditDialog(
                 }
                 
                 Spacer(modifier = Modifier.height(8.dp))
-                
-                OutlinedTextField(
-                    value = category,
-                    onValueChange = { category = it },
-                    label = { Text("分类") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                
+
+                // OutlinedTextField(
+                //     value = category,
+                //     onValueChange = { category = it },
+                //     label = { Text("分类") },
+                //     modifier = Modifier.fillMaxWidth()
+                // )
+                //
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 OutlinedTextField(
@@ -101,8 +104,8 @@ fun PoemEditDialog(
                         )
                     )
                 },
-                enabled = title.isNotBlank() && content.isNotBlank() && 
-                         author.isNotBlank() && category.isNotBlank()
+                enabled = title.isNotBlank() && content.isNotBlank() &&
+                        author.isNotBlank()
             ) {
                 Text("确定")
             }
