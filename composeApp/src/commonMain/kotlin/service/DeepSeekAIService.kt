@@ -5,6 +5,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
+import model.DeepSeekModels
 
 class DeepSeekAIService(
     private val apiKey: String,
@@ -19,7 +20,7 @@ class DeepSeekAIService(
         val frequency_penalty: Int = 0,
         val max_tokens: Int = 4096,
         val presence_penalty: Int = 0,
-        val response_format: ResponseFormat = ResponseFormat(),
+        val response_format: ResponseFormat? = null,
         val temperature: Double = 0.3,
         val top_p: Double = 1.0,
         val stream: Boolean = false
@@ -112,7 +113,8 @@ class DeepSeekAIService(
                     messages = listOf(
                         Message("system", systemPrompt),
                         Message("user", userPrompt)
-                    )
+                    ),
+                    response_format = if (modelVersion == "deepseek-reasoner") null else ResponseFormat()
                 ))
             }
 
@@ -160,7 +162,8 @@ class DeepSeekAIService(
                 header("Authorization", "Bearer $apiKey")
                 setBody(ChatRequest(
                     model = modelVersion,
-                    messages = listOf(Message("user", prompt))
+                    messages = listOf(Message("user", prompt)),
+                    response_format = if (modelVersion == "deepseek-reasoner") null else ResponseFormat()
                 ))
             }
 
@@ -217,6 +220,35 @@ class DeepSeekAIService(
         require(analysis.culturalContext.isNotBlank()) { "文化背景不能为空" }
         require(analysis.literaryDevices.isNotEmpty()) { "写作手法不能为空" }
         require(analysis.emotions.isNotEmpty()) { "情感特征不能为空" }
+    }
+
+    suspend fun getAvailableModels(): List<String> = withRetry {
+        try {
+            val response = client.get("$baseUrl/models") {
+                header("Authorization", "Bearer $apiKey")
+                accept(ContentType.Application.Json)
+            }
+
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val models = response.body<DeepSeekModels>()
+                    models.data.map { it.id }
+                }
+
+                HttpStatusCode.Unauthorized ->
+                    throw AIServiceException.AuthenticationError("DeepSeek API Key 无效")
+
+                else -> throw AIServiceException.APIError(
+                    response.status.value,
+                    "获取模型列表失败"
+                )
+            }
+        } catch (e: Exception) {
+            when (e) {
+                is AIServiceException -> throw e
+                else -> throw AIServiceException.NetworkError("获取模型列表失败: ${e.message}", e)
+            }
+        }
     }
 }
 

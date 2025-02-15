@@ -5,6 +5,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
+import model.GeminiModels
 
 class GeminiAIService(
     private val apiKey: String,
@@ -176,6 +177,35 @@ class GeminiAIService(
             when (e) {
                 is AIServiceException -> throw e
                 else -> throw AIServiceException.NetworkError("Gemini API 调用失败: ${e.message}", e)
+            }
+        }
+    }
+
+    suspend fun getAvailableModels(): List<GeminiModels.ModelInfo> = withRetry {
+        try {
+            val response = client.get("$baseUrl/models") {
+                parameter("key", apiKey)
+                accept(ContentType.Application.Json)
+            }
+
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val models = response.body<GeminiModels>()
+                    models.models
+                }
+
+                HttpStatusCode.Unauthorized ->
+                    throw AIServiceException.AuthenticationError("Gemini API Key 无效")
+
+                else -> throw AIServiceException.APIError(
+                    response.status.value,
+                    "获取模型列表失败"
+                )
+            }
+        } catch (e: Exception) {
+            when (e) {
+                is AIServiceException -> throw e
+                else -> throw AIServiceException.NetworkError("获取模型列表失败: ${e.message}", e)
             }
         }
     }
