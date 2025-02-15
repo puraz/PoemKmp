@@ -17,11 +17,11 @@
 
 ## 🖼 示例图片
 
-![主页](https://pic1.imgdb.cn/item/67b03b7ed0e0a243d4ff9071.png)
+![主页](images/QQ20250126-111529-mainpage.png)
 
-![收藏页](https://pic1.imgdb.cn/item/67b03b9ad0e0a243d4ff9077.png)
+![收藏页](images/QQ20250212-225104-collect.png)
 
-![搜索页](https://pic1.imgdb.cn/item/67b03b9ad0e0a243d4ff9076.png)
+![搜索页](images/QQ20250212-232432-search.png)
 
 ## 🚀 快速开始
 
