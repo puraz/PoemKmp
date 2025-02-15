@@ -20,7 +20,7 @@ class DeepSeekAIService(
         val max_tokens: Int = 4096,
         val presence_penalty: Int = 0,
         val response_format: ResponseFormat = ResponseFormat(),
-        val temperature: Double = 0.7,
+        val temperature: Double = 0.3,
         val top_p: Double = 1.0,
         val stream: Boolean = false
     )

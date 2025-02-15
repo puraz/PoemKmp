@@ -85,7 +85,7 @@ class AISearchViewModel(
                     author = aiResult.author,
                     dynasty = aiResult.dynasty,
                     category = aiResult.category ?: "其他",
-                    notes = aiResult.notes,
+                    notes = null,
                     create_time = System.currentTimeMillis(),
                     update_time = System.currentTimeMillis(),
                     is_favorite = 0,

@@ -30,7 +30,8 @@ class GeminiAIService(
         
         @Serializable
         data class GenerationConfig(
-            val temperature: Double = 0.7
+            val temperature: Double = 0.3,
+            val response_mime_type: String = "application/json"
         )
     }
 

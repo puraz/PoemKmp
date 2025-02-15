@@ -10,13 +10,16 @@ object AIModelManager {
     private val modelChangeListeners = mutableListOf<() -> Unit>()
     private val defaultModel = AIModel.DEEPSEEK
 
+    // 存储当前模型的键名
+    private const val KEY_CURRENT_MODEL = "current_model"
+
     enum class AIModel(val displayName: String) {
         DEEPSEEK("DeepSeek"),
         GEMINI("Gemini")
     }
 
     // 当前选中的模型
-    private val _currentModel = MutableStateFlow(AIModel.DEEPSEEK)
+    private val _currentModel = MutableStateFlow(defaultModel)
     val currentModel: StateFlow<AIModel> = _currentModel.asStateFlow()
 
     // 模型配置数据类
@@ -38,11 +41,24 @@ object AIModelManager {
     }
 
     private fun loadSettings() {
+        if (!::databaseManager.isInitialized) {
+            _currentModel.value = defaultModel
+            return
+        }
+
         try {
-            val modelName = getSetting("current_model", defaultModel.name)
-            _currentModel.value = AIModel.valueOf(modelName)
+            // 从数据库加载当前模型设置
+            val savedModelName = databaseManager.settingsQueries
+                .selectByKey(KEY_CURRENT_MODEL)
+                .executeAsOneOrNull()
+
+            if (savedModelName != null) {
+                _currentModel.value = AIModel.valueOf(savedModelName)
+            } else {
+                _currentModel.value = defaultModel
+            }
         } catch (e: Exception) {
-            // 如果出现任何错误，使用默认值
+            println("加载模型设置失败: ${e.message}")
             _currentModel.value = defaultModel
         }
     }
@@ -86,14 +102,28 @@ object AIModelManager {
     // 设置当前模型
     fun setModel(model: AIModel) {
         _currentModel.value = model
+
+        // 保存到数据库
+        if (::databaseManager.isInitialized) {
+            try {
+                databaseManager.settingsQueries.upsertSetting(
+                    key = KEY_CURRENT_MODEL,
+                    value_ = model.name,
+                    update_time = System.currentTimeMillis()
+                )
+            } catch (e: Exception) {
+                println("保存模型设置失败: ${e.message}")
+            }
+        }
+        
         // 通知所有监听器
         modelChangeListeners.forEach { it.invoke() }
     }
 
     // 获取默认的基础URL
     private fun getDefaultBaseUrl(model: AIModel): String = when (model) {
-        AIModel.DEEPSEEK -> "https://api.deepseek.com/v1"
-        AIModel.GEMINI -> "https://generativelanguage.googleapis.com/v1"
+        AIModel.DEEPSEEK -> "https://api.deepseek.com"
+        AIModel.GEMINI -> "https://api-proxy.me/gemini/v1beta"
     }
 
     // 获取默认的模型版本

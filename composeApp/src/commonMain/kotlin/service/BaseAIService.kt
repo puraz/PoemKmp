@@ -152,13 +152,26 @@ abstract class BaseAIService {
     protected fun createUserPrompt(query: String, poems: List<Poem_entity>) = if (poems.isEmpty()) {
         """
                 基于我的搜索意图"$query"，请推荐最匹配的古诗词。要求：
-                1. 返回完整的诗词内容，诗词的标题、作者、朝代、全文都要正确，并确保正确的换行和分段格式，**直接返回 JSON 数组格式，不需要使用 ```json 代码块，也不需要任何额外的说明或解释**
+                1. 返回完整的诗词内容，诗词的标题、作者、朝代、全文都要正确，并确保正确的换行和分段格式，
                 2. 包含标题、作者、朝代、全文，朝代返回空字符串表示未知，标题不要带书名号“《”， 朝代比如“宋代”只需返回“宋”，**诗句要完整，不要只返回一两句**
                 3. 说明为什么这首诗词匹配我的搜索
-                4. 返回 JSON 数组格式，数组直接在最外层，不需要有名称
-                5. 数组中的对象包含 title, content, author, dynasty, relevanceScore, matchReason 字段
-                6. content 字段中的换行使用 \n 表示，段落之间使用 \n\n 表示
-                7. 不能以```json开头，直接返回 JSON 数组格式
+                4. 数组中的对象包含 title, content, author, dynasty, relevanceScore, matchReason 字段
+                5. content 字段中的换行使用 \n 表示，段落之间使用 \n\n 表示
+                6. 不能以```json开头，直接返回 JSON 数组格式
+                7. **直接返回 JSON 数组格式，不需要使用 ```json 代码块，也不需要任何额外的说明或解释**，返回 JSON 数组格式，数组直接在最外层，不需要有名称
+                8. 返回结果的 JSON 格式应为 List<AISearchResult>，其中 AISearchResult 对象的字段定义如下：
+                AISearchResult = {
+                    "title": 诗歌标题 (String),
+                    "content": 诗歌内容 (String),
+                    "author": 诗歌作者 (String),
+                    "dynasty": 诗歌朝代 (String, 可以为空),
+                    "category": 诗歌类别 (String, 可以为空),
+                    "notes": 诗歌注释 (String, 可以为空),
+                    "relevanceScore": 相关度评分 (Double, 范围在 0.0 到 1.0 之间),
+                    "matchReason": 匹配原因 (String),
+                    "isRecommendation": 是否推荐 (Boolean, 默认为 false)
+                }
+                请确保返回的 JSON 格式正确，可以直接被程序解析。
                 """.trimIndent()
     } else {
         """
