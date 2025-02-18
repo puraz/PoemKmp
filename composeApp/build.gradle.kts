@@ -80,43 +80,46 @@ compose.desktop {
         mainClass = "org.example.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.AppImage, TargetFormat.Exe)
-            packageName = "poemkmp"
-            packageVersion = "1.0.0"
-            
-            // 添加 RPM 特定配置
-            linux {
-                // RPM 包信息配置
-                packageName = "poemkmp"  // RPM 包名
-                debMaintainer = "puraz2258@gmail.com"  // 维护者邮箱
-                appCategory = "Utility"  // 应用类别
-                menuGroup = "Utility"  // 应用程序菜单分组
-                
-                // 安装位置配置
-                installationPath = "/opt/${packageName}"  // 安装路径
-                
-                // RPM 包元数据
-                rpmLicenseType = "Apache 2.0"  // 许可证类型
-                rpmPackageVersion = "1.0.0"  // 发布者
+            targetFormats(
+                TargetFormat.Dmg,
+                TargetFormat.Msi,
+                TargetFormat.AppImage,
+                TargetFormat.Exe,
+                TargetFormat.Deb,
+                TargetFormat.Rpm
+            )
+            // 从环境变量或 gradle.properties 获取版本号
+            packageVersion = System.getenv("VERSION")?.removePrefix("v") ?: "1.0.0"
 
-                // 图标配置（可选）
-                // iconFile.set(project.file("src/main/resources/icon.png"))
+            // RPM 包信息配置
+            linux {
+                packageName = "poemkmp"
+                debMaintainer = "puraz2258@gmail.com"
+                appCategory = "Utility"
+                menuGroup = "Utility"
+                installationPath = "/opt/\${packageName}"
+                rpmLicenseType = "Apache 2.0"
+                // 使用与 packageVersion 相同的版本号
+                rpmPackageVersion = packageVersion
             }
 
-            /*windows {
-                // Windows 特定配置
-                packageName = "诗词收藏"  // 应用名称
-                dirChooser = true  // 允许用户选择安装目录
-                menuGroup = "诗词收藏"  // 开始菜单分组
-                upgradeUuid = "2258659c-c124-4b04-a60e-e5d0f0c5bf48"  // 用于应用更新的唯一标识符
+            windows {
+                packageName = "诗词收藏"
+                dirChooser = true
+                menuGroup = "诗词收藏"
+                upgradeUuid = "2258659c-c124-4b04-a60e-e5d0f0c5bf48"
+                // 使用与 packageVersion 相同的版本号
+                msiPackageVersion = packageVersion
+                exePackageVersion = packageVersion
+            }
 
-                // 图标配置（可选）
-                // iconFile.set(project.file("src/main/resources/icon.ico"))
-
-                // 安装程序配置
-                msiPackageVersion = "1.0.0"  // MSI 安装包版本
-                exePackageVersion = "1.0.0"  // EXE 安装包版本
-            }*/
+            macOS {
+                packageName = "诗词收藏"
+                // 添加 macOS 特定的签名配置（如果需要）
+                signing {
+                    sign.set(false) // 如果没有证书，设置为 false
+                }
+            }
         }
 
         buildTypes.release.proguard {
