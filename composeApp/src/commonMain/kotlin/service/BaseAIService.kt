@@ -187,7 +187,7 @@ abstract class BaseAIService {
                 《${poem.title}》 - ${poem.author}
                 ${poem.content}
                 
-                **注意：直接返回 JSON 数组格式，不需要 ```json 代码块**  
+                **注意：直接返回 JSON ，不需要 ```json 代码块**，返回 JSON 格式应为 PoemAnalysis 对象，而不是 PoemAnalysis 对象数组，字段定义如下：
                 请从以下维度进行分析，并以 JSON 格式返回：
                 1. theme: 主题思想
                 2. style: 写作风格
