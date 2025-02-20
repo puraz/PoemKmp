@@ -72,11 +72,26 @@ abstract class BaseAIService {
         throw AIServiceException.NetworkError("超过最大重试次数")
     }
     
-    protected fun validateJsonResponse(jsonString: String) {
+    protected fun validateJsonResponse(jsonString: String, expectArray: Boolean = true): String {
         try {
-            val jsonElement = json.parseToJsonElement(jsonString)
-            if (jsonElement !is JsonArray && jsonElement !is JsonObject) {
-                throw AIServiceException.ResponseParsingError("响应格式不正确")
+            val trimmedJson = jsonString.trim()
+            
+            // 验证JSON格式是否正确
+            val jsonElement = json.parseToJsonElement(trimmedJson)
+            
+            if (expectArray) {
+                // 如果期望数组格式
+                return when {
+                    jsonElement is JsonArray -> trimmedJson
+                    jsonElement is JsonObject -> "[$trimmedJson]"
+                    else -> throw AIServiceException.ResponseParsingError("响应格式不正确：必须是JSON对象或数组")
+                }
+            } else {
+                // 如果期望对象格式
+                if (jsonElement !is JsonObject) {
+                    throw AIServiceException.ResponseParsingError("响应格式不正确：期望对象格式")
+                }
+                return trimmedJson
             }
         } catch (e: Exception) {
             throw AIServiceException.ResponseParsingError("JSON解析失败", e)
@@ -153,7 +168,7 @@ abstract class BaseAIService {
         """
                 基于我的搜索意图"$query"，请推荐最匹配的古诗词。要求：
                 1. 返回完整的诗词内容，诗词的标题、作者、朝代、全文都要正确，并确保正确的换行和分段格式，
-                2. 包含标题、作者、朝代、全文，朝代返回空字符串表示未知，标题不要带书名号“《”， 朝代比如“宋代”只需返回“宋”，**诗句要完整，不要只返回一两句**
+                2. 包含标题、作者、朝代、全文，朝代返回空字符串表示未知，标题不要带书名号"《"， 朝代比如"宋代"只需返回"宋"，**诗句要完整，不要只返回一两句**
                 3. 说明为什么这首诗词匹配我的搜索
                 4. 数组中的对象包含 title, content, author, dynasty, relevanceScore, matchReason 字段
                 5. content 字段中的换行使用 \n 表示，段落之间使用 \n\n 表示

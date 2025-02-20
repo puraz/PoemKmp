@@ -121,15 +121,14 @@ class DeepSeekAIService(
             when (response.status) {
                 HttpStatusCode.OK -> {
                     val chatResponse = response.body<ChatResponse>()
-                    // println("chatResponse: $chatResponse")
                     val content = chatResponse.choices.firstOrNull()?.message?.content
                         ?: throw AIServiceException.InvalidResponseError("响应内容为空")
                     
-                    // 验证 JSON 响应格式
-                    validateJsonResponse(content)
+                    // 验证并可能修正 JSON 响应格式
+                    val validatedContent = validateJsonResponse(content, expectArray = true)
                     
                     // 解析并验证结果
-                    val results = json.decodeFromString<List<AISearchResult>>(content)
+                    val results = json.decodeFromString<List<AISearchResult>>(validatedContent)
                     validateSearchResults(results)
                     return results
                 }
@@ -173,7 +172,8 @@ class DeepSeekAIService(
                     val content = chatResponse.choices.firstOrNull()?.message?.content
                         ?: throw AIServiceException.InvalidResponseError("响应内容为空")
                     
-                    validateJsonResponse(content)
+                    // 验证 JSON 响应格式（对于 PoemAnalysis，我们期望是一个对象而不是数组）
+                    validateJsonResponse(content, expectArray = false)
                     
                     val analysis = json.decodeFromString<PoemAnalysis>(content)
                     validatePoemAnalysis(analysis)

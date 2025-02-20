@@ -107,8 +107,8 @@ class GeminiAIService(
                         throw AIServiceException.InvalidResponseError("响应未完全生成")
                     }
                     
-                    validateJsonResponse(content)
-                    val results = json.decodeFromString<List<AISearchResult>>(content)
+                    val validatedContent = validateJsonResponse(content, expectArray = true)
+                    val results = json.decodeFromString<List<AISearchResult>>(validatedContent)
                     validateSearchResults(results)
                     results
                 }
@@ -156,7 +156,7 @@ class GeminiAIService(
                     val content = geminiResponse.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text
                         ?: throw AIServiceException.InvalidResponseError("响应内容为空")
                     
-                    validateJsonResponse(content)
+                    validateJsonResponse(content, expectArray = false)
                     val analysis = json.decodeFromString<PoemAnalysis>(content)
                     validatePoemAnalysis(analysis)
                     analysis
