@@ -29,7 +29,7 @@
 -dontwarn io.ktor.**
 
 # 保留主程序入口
--keep class MainKt {
+-keep class org.example.MainKt {
     public static void main(java.lang.String[]);
 }
 
@@ -52,4 +52,4 @@
 -keepattributes Signature
 -keepattributes SourceFile,LineNumberTable
 -keepattributes *Annotation*
--keepattributes InnerClasses 
+-keepattributes InnerClasses

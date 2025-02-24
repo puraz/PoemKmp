@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     kotlin("plugin.serialization") version "1.9.0" // Use your Kotlin version
-    id("app.cash.sqldelight") version "2.0.1"
+    id("app.cash.sqldelight") version "2.0.0"
 }
 
 kotlin {
@@ -83,7 +83,7 @@ compose.desktop {
             targetFormats(
                 TargetFormat.Dmg,
                 TargetFormat.Msi,
-                TargetFormat.AppImage,
+                // TargetFormat.AppImage,  // Remove AppImage for macOS
                 TargetFormat.Exe,
                 TargetFormat.Deb,
                 TargetFormat.Rpm
