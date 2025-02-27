@@ -39,7 +39,18 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew :composeApp:packageReleaseDistributionForCurrentOS
+        shell: bash
+        run: |
+          # 统一处理不同操作系统的换行符
+          git config --global core.autocrlf input
+          ./gradlew :composeApp:packageReleaseDistributionForCurrentOS \
+            --no-daemon \
+            --console=plain \
+            -Dorg.gradle.jvmargs='-Xmx4g' \
+            -Dorg.gradle.daemon=false
+        env:
+          TERM: dumb  # 禁用交互式功能
+          CI: true    # 启用CI模式（部分插件会根据此变量调整行为）
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
