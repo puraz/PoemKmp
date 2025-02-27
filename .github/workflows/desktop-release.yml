@@ -12,14 +12,15 @@ jobs:
     strategy:
       matrix:
         # os: [ ubuntu-latest, windows-latest, macos-latest ]
-        os: [ windows-latest ]
+        # os: [ windows-latest ]
+        os: [ ubuntu-latest, macos-latest ]
         include:
-          # - os: ubuntu-latest
-          #   artifact_glob: '**/*.deb'  # 修改通配符格式
-          - os: windows-latest
-            artifact_glob: '**/*.msi,**/*.exe'
-          # - os: macos-latest
-          #   artifact_glob: '**/*.dmg'
+          - os: ubuntu-latest
+            artifact_glob: '**/*.deb'  # 修改通配符格式
+          # - os: windows-latest
+          #   artifact_glob: '**/*.msi,**/*.exe'
+          - os: macos-latest
+            artifact_glob: '**/*.dmg'
 
     runs-on: ${{ matrix.os }}
 
@@ -54,11 +55,8 @@ jobs:
           # 统一处理不同操作系统的换行符
           git config --global core.autocrlf input
           ./gradlew :composeApp:packageReleaseDistributionForCurrentOS \
-            --warning-mode all \
             --no-daemon \
             --console=plain \
-            --no-build-cache \
-            --debug \
             -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g' \
             -Dorg.gradle.daemon=false \
             -Dorg.gradle.logging.level=info
