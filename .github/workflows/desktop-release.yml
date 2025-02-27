@@ -44,6 +44,7 @@ jobs:
           # 统一处理不同操作系统的换行符
           git config --global core.autocrlf input
           ./gradlew :composeApp:packageReleaseDistributionForCurrentOS \
+            --warning-mode all \
             --no-daemon \
             --console=plain \
             -Dorg.gradle.jvmargs='-Xmx4g' \
