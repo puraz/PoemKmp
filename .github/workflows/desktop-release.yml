@@ -37,7 +37,7 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          distribution: 'corretto'
+          distribution: 'microsoft'
           java-version: '17'
 
       - uses: gradle/gradle-build-action@v2
@@ -56,8 +56,6 @@ jobs:
           ./gradlew :composeApp:packageReleaseDistributionForCurrentOS \
             --warning-mode all \
             --no-daemon \
-            --stacktrace \
-            --debug \
             --console=plain \
             -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g' \
             -Dorg.gradle.daemon=false \
