@@ -62,8 +62,8 @@ jobs:
         env:
           TERM: dumb  # 禁用交互式功能
           CI: true    # 启用CI模式（部分插件会根据此变量调整行为）
-          _JAVA_OPTIONS: "-Djava.io.tmpdir=${{ runner.temp }}/jpackage_temp"
-          JPACKAGE_TEMP: "${{ runner.temp }}/jpackage_temp"
+          # _JAVA_OPTIONS: "-Djava.io.tmpdir=${{ runner.temp }}/jpackage_temp"
+          # JPACKAGE_TEMP: "${{ runner.temp }}/jpackage_temp"
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
