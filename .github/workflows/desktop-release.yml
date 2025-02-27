@@ -38,7 +38,7 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          distribution: 'microsoft'
+          distribution: 'corretto'
           java-version: '17'
 
       - uses: gradle/gradle-build-action@v2
@@ -52,7 +52,6 @@ jobs:
       - name: Build with Gradle
         shell: bash
         run: |
-          # 统一处理不同操作系统的换行符
           git config --global core.autocrlf input
           ./gradlew :composeApp:packageReleaseDistributionForCurrentOS \
             --no-daemon \
