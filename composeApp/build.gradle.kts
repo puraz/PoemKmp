@@ -14,7 +14,7 @@ kotlin {
             kotlinOptions.jvmTarget = "17"
         }
     }
-    
+
     sourceSets {
 
         val commonMain by getting {
@@ -92,7 +92,7 @@ compose.desktop {
                 // TargetFormat.AppImage,  // Remove AppImage for macOS
                 TargetFormat.Exe,
                 TargetFormat.Deb,
-                TargetFormat.Rpm
+                // TargetFormat.Rpm
             )
             // 从环境变量或 gradle.properties 获取版本号
             packageVersion = System.getenv("VERSION")?.removePrefix("v") ?: "1.0.0"
