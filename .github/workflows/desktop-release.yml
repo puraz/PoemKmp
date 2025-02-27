@@ -11,19 +11,29 @@ jobs:
     name: Build Artifacts
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        # os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ windows-latest ]
         include:
-          - os: ubuntu-latest
-            artifact_glob: '**/*.deb'  # 修改通配符格式
+          # - os: ubuntu-latest
+          #   artifact_glob: '**/*.deb'  # 修改通配符格式
           - os: windows-latest
             artifact_glob: '**/*.msi,**/*.exe'
-          - os: macos-latest
-            artifact_glob: '**/*.dmg'
+          # - os: macos-latest
+          #   artifact_glob: '**/*.dmg'
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare Windows
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          # 修复260字符路径限制
+          Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1
+          # 创建临时目录
+          New-Item -Path "$env:RUNNER_TEMP\jpackage_temp" -ItemType Directory -Force
 
       - uses: actions/setup-java@v3
         with:
@@ -46,12 +56,17 @@ jobs:
           ./gradlew :composeApp:packageReleaseDistributionForCurrentOS \
             --warning-mode all \
             --no-daemon \
+            --stacktrace \
+            --debug \
             --console=plain \
-            -Dorg.gradle.jvmargs='-Xmx4g' \
-            -Dorg.gradle.daemon=false
+            -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g' \
+            -Dorg.gradle.daemon=false \
+            -Dorg.gradle.logging.level=info
         env:
           TERM: dumb  # 禁用交互式功能
           CI: true    # 启用CI模式（部分插件会根据此变量调整行为）
+          _JAVA_OPTIONS: "-Djava.io.tmpdir=${{ runner.temp }}/jpackage_temp"
+          JPACKAGE_TEMP: "${{ runner.temp }}/jpackage_temp"
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
