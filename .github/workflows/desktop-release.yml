@@ -57,6 +57,7 @@ jobs:
             --warning-mode all \
             --no-daemon \
             --console=plain \
+            --no-build-cache \
             -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g' \
             -Dorg.gradle.daemon=false \
             -Dorg.gradle.logging.level=info
