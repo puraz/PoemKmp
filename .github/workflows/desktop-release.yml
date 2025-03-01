@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write  # 赋予 GITHUB_TOKEN 对仓库内容的写权限
+
 jobs:
   build:
     name: Build Artifacts
