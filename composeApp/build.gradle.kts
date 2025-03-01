@@ -99,7 +99,7 @@ compose.desktop {
 
             // RPM 包信息配置
             linux {
-                packageName = "poemkmp"
+                packageName = "PoemKmp"
                 // LingXi Verse
                 debMaintainer = "puraz2258@gmail.com"
                 appCategory = "Utility"
@@ -111,9 +111,9 @@ compose.desktop {
             }
 
             windows {
-                packageName = "灵犀诗境"
+                packageName = "PoemKmp"
                 dirChooser = true
-                menuGroup = "灵犀诗境"
+                menuGroup = "PoemKmp"
                 upgradeUuid = "2258659c-c124-4b04-a60e-e5d0f0c5bf48"
                 // 使用与 packageVersion 相同的版本号
                 msiPackageVersion = packageVersion
@@ -121,7 +121,7 @@ compose.desktop {
             }
 
             macOS {
-                packageName = "灵犀诗境"
+                packageName = "PoemKmp"
                 // 添加 macOS 特定的签名配置（如果需要）
                 signing {
                     sign.set(false) // 如果没有证书，设置为 false
