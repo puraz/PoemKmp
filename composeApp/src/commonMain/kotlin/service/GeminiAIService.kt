@@ -158,7 +158,7 @@ class GeminiAIService(
                     
                     validateJsonResponse(content)
                     val analysis = json.decodeFromString<PoemAnalysis>(content)
-                    validatePoemAnalysis(analysis)
+                    // validatePoemAnalysis(analysis)
                     analysis
                 }
                 HttpStatusCode.Unauthorized -> 
@@ -224,12 +224,12 @@ class GeminiAIService(
         }
     }
 
-    private fun validatePoemAnalysis(analysis: PoemAnalysis) {
+    /*private fun validatePoemAnalysis(analysis: PoemAnalysis) {
         require(analysis.theme.isNotBlank()) { "主题思想不能为空" }
         require(analysis.style.isNotBlank()) { "写作风格不能为空" }
         require(analysis.interpretation.isNotBlank()) { "诗歌赏析不能为空" }
         require(analysis.culturalContext.isNotBlank()) { "文化背景不能为空" }
         require(analysis.literaryDevices.isNotEmpty()) { "写作手法不能为空" }
         require(analysis.emotions.isNotEmpty()) { "情感特征不能为空" }
-    }
+    }*/
 }

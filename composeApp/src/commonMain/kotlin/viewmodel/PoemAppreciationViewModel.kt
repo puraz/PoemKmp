@@ -24,20 +24,26 @@ class PoemAppreciationViewModel(
     private val _appreciationState = MutableStateFlow<AppreciationState>(AppreciationState.Initial)
     val appreciationState: StateFlow<AppreciationState> = _appreciationState
 
+
     fun loadOrAnalyzePoem(poem: Poem_entity) {
         viewModelScope.launch {
             _appreciationState.value = AppreciationState.Loading
 
             try {
-                // 先检查数据库中是否有缓存的赏析
-                if (!poem.appreciation_content.isNullOrBlank()) {
-                    // 如果有缓存，直接使用缓存的内容
-                    val analysis = Json.decodeFromString<PoemAnalysis>(poem.appreciation_content)
-                    _appreciationState.value = AppreciationState.Success(analysis)
-                } else {
-                    // 如果没有缓存，调用 AI 服务
-                    analyzeAndSave(poem)
+                // 首先检查缓存里有没有赏析内容了
+                val cachedAppreciation = poem.appreciation_content
+                if (!cachedAppreciation.isNullOrBlank()) {
+                    try {
+                        val analysis = json.decodeFromString<PoemAnalysis>(cachedAppreciation)
+                        _appreciationState.value = AppreciationState.Success(analysis)
+                        return@launch
+                    } catch (e: Exception) {
+                        // If parsing fails, continue to reanalyze
+                    }
                 }
+
+                // If no cache or parsing failed, get a new analysis
+                analyzeAndSave(poem)
             } catch (e: Exception) {
                 _appreciationState.value = AppreciationState.Error(e.message ?: "赏析失败")
             }

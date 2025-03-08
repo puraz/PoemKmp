@@ -182,18 +182,44 @@ abstract class BaseAIService {
                 """.trimIndent()
     }
 
-    protected fun createAnalysisPrompt(poem: Poem_entity) = """
-                请分析这首诗：
-                《${poem.title}》 - ${poem.author}
-                ${poem.content}
-                
-                **注意：直接返回 JSON ，不需要 ```json 代码块**，返回 JSON 格式应为 PoemAnalysis 对象，而不是 PoemAnalysis 对象数组，字段定义如下：
-                请从以下维度进行分析，并以 JSON 格式返回：
-                1. theme: 主题思想
-                2. style: 写作风格
-                3. interpretation: 诗歌赏析
-                4. culturalContext: 文化背景
-                5. literaryDevices: 写作手法 (数组)
-                6. emotions: 情感特征 (数组)
-            """.trimIndent()
+    // protected fun createAnalysisPrompt(poem: Poem_entity) = """
+    //             请分析这首诗：
+    //             《${poem.title}》 - ${poem.author}
+    //             ${poem.content}
+    //
+    //             **注意：直接返回 JSON ，不需要 ```json 代码块**，返回 JSON 格式应为 PoemAnalysis 对象，而不是 PoemAnalysis 对象数组，字段定义如下：
+    //             请从以下维度进行分析，并以 JSON 格式返回：
+    //             1. theme: 主题思想
+    //             2. style: 写作风格
+    //             3. interpretation: 诗歌赏析
+    //             4. culturalContext: 文化背景
+    //             5. literaryDevices: 写作手法 (数组)
+    //             6. emotions: 情感特征 (数组)
+    //         """.trimIndent();
+    protected fun createAnalysisPrompt(poem: Poem_entity): String = """
+        请分析这首诗：
+        《${poem.title}》 - ${poem.author}
+        ${poem.content}
+        
+        请从以下维度进行分析，并以JSON格式直接返回（不要包含```json```标记）：
+        
+        {
+          "coreTheme": "核心主题，10-15字",
+          "essenceStyle": "风格精髓，5-10字",
+          "keyEmotions": ["核心情感，3个关键词"],
+          "highlightTechniques": ["高亮技法，最多3个"],
+          "primaryEmotions": [
+            {"emotion": "情感1", "intensity": 0.5},
+            {"emotion": "情感2", "intensity": 0.3},
+            {"emotion": "情感3", "intensity": 0.2}
+          ],
+          "culturalContext": "文化背景，50字左右",
+          "deepInterpretation": "深度解读，100字左右"
+        }
+        
+        注意：
+        1. 直接返回JSON，不需要任何解释或前导文字。
+        2. primaryEmotions中必须包含3个主要情感，每个情感都需要有一个名称(emotion)和一个强度值(intensity)。
+        3. 所有情感强度值(intensity)加起来必须等于1.0，表示情感的相对重要性。
+    """.trimIndent()
 } 

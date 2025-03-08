@@ -1,23 +1,25 @@
-import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import data.db.Poem_entity
 import service.PoemAnalysis
+import ui.components.PieChart
 import viewmodel.AppreciationState
 import viewmodel.PoemAppreciationViewModel
 
@@ -29,22 +31,24 @@ fun PoemAppreciationDialog(
 ) {
     val appreciationState by viewModel.appreciationState.collectAsState()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(poem.id) {
         viewModel.loadOrAnalyzePoem(poem)
     }
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false) // 重要：允许自定义宽度
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
-            // 使用 Surface 或 Card 来提供背景和阴影
             modifier = Modifier
-                .fillMaxWidth(0.8f) // 或固定宽度 .width(800.dp)
-                .fillMaxHeight(0.8f),  // 限制最大高度,
-            shape = RoundedCornerShape(6.dp), // 圆角
+                .fillMaxWidth(0.8f)
+                .fillMaxHeight(0.8f)
+                .shadow(elevation = 8.dp, shape = RoundedCornerShape(6.dp)),
+            shape = RoundedCornerShape(6.dp),
+            color = MaterialTheme.colors.surface
         ) {
             Column {
+                // Header with title and refresh button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -52,7 +56,7 @@ fun PoemAppreciationDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("诗词鉴赏", style = MaterialTheme.typography.body2)
+                    Text("诗词鉴赏", style = MaterialTheme.typography.h6)
                     if (appreciationState is AppreciationState.Success) {
                         IconButton(
                             onClick = { viewModel.reanalyzePoem(poem) }
@@ -65,11 +69,39 @@ fun PoemAppreciationDialog(
                         }
                     }
                 }
-                // 内容和滚动
+
+                // Poem information
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 32.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = poem.title,
+                        style = MaterialTheme.typography.h5,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "作者：${poem.author}" + (poem.dynasty?.let { " · $it" } ?: ""),
+                        style = MaterialTheme.typography.subtitle1
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = poem.content,
+                        style = MaterialTheme.typography.body1,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Divider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+
+                // Content area with state handling
                 Box(
                     modifier = Modifier
-                        .weight(1f) // 占据剩余空间
-                        .padding(horizontal = 16.dp), // 左右边距
+                        .weight(1f)
+                        .padding(horizontal = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     when (val state = appreciationState) {
@@ -114,7 +146,7 @@ fun PoemAppreciationDialog(
                     }
                 }
 
-                // 关闭按钮
+                // Close button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -135,36 +167,40 @@ private fun AppreciationContent(
     analysis: PoemAnalysis,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .padding(start = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        AppreciationSection("主题思想", analysis.theme)
-        AppreciationSection("写作风格", analysis.style)
-        AppreciationSection("诗歌赏析", analysis.interpretation)
-        AppreciationSection("文化背景", analysis.culturalContext)
-        AppreciationSection("写作手法", analysis.literaryDevices.joinToString("\n"))
-        AppreciationSection("情感特征", analysis.emotions.joinToString("\n"))
-    }
-}
+    Column(modifier = modifier.padding(16.dp)) {
+        // Core Information Section (Always visible)
+        ExpandingCard(title = "核心解读", initiallyExpanded = true) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                KeyValueRow("主题", analysis.coreTheme)
+                KeyValueRow("风格", analysis.essenceStyle)
+                KeyValueRow("情感基调", analysis.keyEmotions.joinToString(", "))
+            }
+        }
 
-@Composable
-private fun AppreciationSection(
-    title: String,
-    content: String
-) {
-    Column {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.h6,
-            color = MaterialTheme.colors.primary
-        )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = content,
-            style = MaterialTheme.typography.body1
-        )
+
+        // Deep Analysis Section (Collapsible)
+        ExpandingCard(title = "深度解析") {
+            Column(modifier = Modifier.padding(16.dp)) {
+                KeyValueRow("文化背景", analysis.culturalContext)
+                KeyValueRow("经典技法", analysis.highlightTechniques.joinToString(" · "))
+                Text(
+                    text = "意境解读：${analysis.deepInterpretation}",
+                    style = MaterialTheme.typography.body1
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Emotion visualization (if available)
+        if (analysis.primaryEmotions.isNotEmpty()) {
+            val emotionEntries = analysis.primaryEmotions
+                .filter { it.intensity > 0 }  // 例如，过滤掉强度为0的情感
+            // 可以在这里添加其他转换
+
+            PieChart(emotions = emotionEntries)
+        }
     }
 }
 
@@ -174,7 +210,7 @@ private fun ErrorContent(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -188,5 +224,111 @@ private fun ErrorContent(
             text = message,
             style = MaterialTheme.typography.body1
         )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = { /* Retry logic would go here */ },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.primary
+            )
+        ) {
+            Text("重试")
+        }
     }
+}
+
+@Composable
+private fun ExpandingCard(
+    title: String,
+    modifier: Modifier = Modifier,
+    initiallyExpanded: Boolean = false,
+    content: @Composable () -> Unit
+) {
+    var isExpanded by remember { mutableStateOf(initiallyExpanded) }
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = 2.dp
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isExpanded = !isExpanded }
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.h6
+                )
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                    contentDescription = if (isExpanded) "折叠" else "展开",
+                    tint = MaterialTheme.colors.primary
+                )
+            }
+
+            if (isExpanded) {
+                Divider()
+                content()
+            }
+        }
+    }
+}
+
+@Composable
+fun KeyValueRow(key: String, value: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        Text(
+            text = "$key: ",
+            style = MaterialTheme.typography.body1,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.body1
+        )
+    }
+}
+
+@Composable
+fun KeywordText(text: String, keywords: Set<String>, modifier: Modifier = Modifier) {
+    val highlightedText = buildAnnotatedString {
+        val parts = text.split(*keywords.toTypedArray())
+        var startIndex = 0
+
+        keywords.forEach { keyword ->
+            val index = text.indexOf(keyword, startIndex)
+            if (index >= 0) {
+                // Add text before keyword
+                append(text.substring(startIndex, index))
+
+                // Add highlighted keyword
+                withStyle(
+                    style = MaterialTheme.typography.body1.toSpanStyle().copy(
+                        color = MaterialTheme.colors.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                ) {
+                    append(keyword)
+                }
+
+                startIndex = index + keyword.length
+            }
+        }
+
+        // Add remaining text
+        if (startIndex < text.length) {
+            append(text.substring(startIndex))
+        }
+    }
+
+    Text(text = highlightedText, modifier = modifier)
 }
