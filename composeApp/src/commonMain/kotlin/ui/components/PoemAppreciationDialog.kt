@@ -74,7 +74,7 @@ fun PoemAppreciationDialog(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 32.dp, vertical = 8.dp)
+                        .padding(horizontal = 40.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = poem.title,
