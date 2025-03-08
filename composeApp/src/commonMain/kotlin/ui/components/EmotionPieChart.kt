@@ -3,7 +3,6 @@ package ui.components
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,12 +40,12 @@ fun PieChart(emotions: List<EmotionWithIntensity>, modifier: Modifier = Modifier
             .padding(16.dp)
     ) {
         // 左对齐的标题
-        Text(
-            text = "情感分布",
-            style = MaterialTheme.typography.h6,
-            modifier = Modifier.align(Alignment.Start)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+        // Text(
+        //     text = "情感分布",
+        //     style = MaterialTheme.typography.h6,
+        //     modifier = Modifier.align(Alignment.Start)
+        // )
+        // Spacer(modifier = Modifier.height(8.dp))
 
         // 让图表和标注整体居中
         Box(

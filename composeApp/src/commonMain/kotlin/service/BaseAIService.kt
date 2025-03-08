@@ -234,7 +234,7 @@ abstract class BaseAIService {
         
         注意：
         1. 直接返回JSON，不需要任何解释或前导文字。
-        2. primaryEmotions中必须包含3个主要情感，每个情感都需要有一个名称(emotion)和一个强度值(intensity)。
+        2. primaryEmotions中必须包含最多6个主要情感，每个情感都需要有一个名称(emotion)和一个强度值(intensity)，强度值由您评定。
         3. 所有情感强度值(intensity)加起来必须等于1.0，表示情感的相对重要性。
     """.trimIndent()
 } 

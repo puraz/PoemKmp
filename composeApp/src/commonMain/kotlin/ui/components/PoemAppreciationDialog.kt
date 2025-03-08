@@ -1,3 +1,4 @@
+
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -52,7 +52,7 @@ fun PoemAppreciationDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -71,7 +71,7 @@ fun PoemAppreciationDialog(
                 }
 
                 // Poem information
-                Column(
+                /*Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 40.dp, vertical = 8.dp)
@@ -93,9 +93,9 @@ fun PoemAppreciationDialog(
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis
                     )
-                }
+                }*/
 
-                Divider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                // Divider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
 
                 // Content area with state handling
                 Box(
@@ -167,7 +167,7 @@ private fun AppreciationContent(
     analysis: PoemAnalysis,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.padding(16.dp)) {
+    Column(modifier = modifier.padding(horizontal = 16.dp)) {
         // Core Information Section (Always visible)
         ExpandingCard(title = "核心解读", initiallyExpanded = true) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -180,7 +180,7 @@ private fun AppreciationContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         // Deep Analysis Section (Collapsible)
-        ExpandingCard(title = "深度解析") {
+        ExpandingCard(title = "深度解析", initiallyExpanded = true) {
             Column(modifier = Modifier.padding(16.dp)) {
                 KeyValueRow("文化背景", analysis.culturalContext)
                 KeyValueRow("经典技法", analysis.highlightTechniques.joinToString(" · "))
@@ -195,11 +195,13 @@ private fun AppreciationContent(
 
         // Emotion visualization (if available)
         if (analysis.primaryEmotions.isNotEmpty()) {
-            val emotionEntries = analysis.primaryEmotions
-                .filter { it.intensity > 0 }  // 例如，过滤掉强度为0的情感
-            // 可以在这里添加其他转换
+            ExpandingCard(title = "情感分布") {
+                val emotionEntries = analysis.primaryEmotions
+                    .filter { it.intensity > 0 }  // 例如，过滤掉强度为0的情感
+                // 可以在这里添加其他转换
 
-            PieChart(emotions = emotionEntries)
+                PieChart(emotions = emotionEntries)
+            }
         }
     }
 }
@@ -248,7 +250,7 @@ private fun ExpandingCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 6.dp),
         elevation = 2.dp
     ) {
         Column {
@@ -256,7 +258,7 @@ private fun ExpandingCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { isExpanded = !isExpanded }
-                    .padding(16.dp),
+                    .padding(12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
