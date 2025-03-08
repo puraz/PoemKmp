@@ -184,10 +184,7 @@ private fun AppreciationContent(
             Column(modifier = Modifier.padding(16.dp)) {
                 KeyValueRow("文化背景", analysis.culturalContext)
                 KeyValueRow("经典技法", analysis.highlightTechniques.joinToString(" · "))
-                Text(
-                    text = "意境解读：${analysis.deepInterpretation}",
-                    style = MaterialTheme.typography.body1
-                )
+                KeyValueRow("意境解读", analysis.deepInterpretation)
             }
         }
 
