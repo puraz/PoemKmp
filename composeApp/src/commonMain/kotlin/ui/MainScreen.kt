@@ -21,7 +21,8 @@ import viewmodel.ViewModelFactory
 fun MainScreen(viewModelFactory: ViewModelFactory, databaseManager: DatabaseManager) {
     // 初始化 AIModelManager
     AIModelManager.initialize(databaseManager)
-    
+    ThemeManager.initialize(databaseManager)
+
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
     val aiSearchViewModel = remember { viewModelFactory.createAISearchViewModel() }
     val isDarkTheme = ThemeManager.isDarkTheme
