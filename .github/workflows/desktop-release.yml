@@ -6,40 +6,45 @@ on:
       - 'v*'
   workflow_dispatch:
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+permissions:
+  contents: write  # 赋予 GITHUB_TOKEN 对仓库内容的写权限
 
 jobs:
   build:
-    name: Build and Release
+    name: Build Artifacts
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        # os: [ ubuntu-latest, windows-latest, macos-latest ]
+        # os: [ windows-latest ]
+        os: [ ubuntu-latest, macos-latest ]
         include:
           - os: ubuntu-latest
-            artifact_name: '*.deb,*.rpm'
-            asset_name: linux
-          - os: windows-latest
-            artifact_name: '*.msi,*.exe'
-            asset_name: windows
+            artifact_glob: '**/*.deb'  # 修改通配符格式
+          # - os: windows-latest
+          #   artifact_glob: '**/*.msi,**/*.exe'
           - os: macos-latest
-            artifact_name: '*.dmg'
-            asset_name: macos
+            artifact_glob: '**/*.dmg'
 
     runs-on: ${{ matrix.os }}
-    
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
 
-      - name: Set up JDK
-        uses: actions/setup-java@v3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare Windows
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          # 修复260字符路径限制
+          Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1
+          # 创建临时目录
+          New-Item -Path "$env:RUNNER_TEMP\jpackage_temp" -ItemType Directory -Force
+
+      - uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: 'corretto'
           java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v2
         with:
           gradle-home-cache-cleanup: true
 
@@ -48,29 +53,46 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew :composeApp:packageReleaseDistributionForCurrentOS
+        shell: bash
+        run: |
+          git config --global core.autocrlf input
+          ./gradlew :composeApp:packageReleaseDistributionForCurrentOS \
+            --no-daemon \
+            --console=plain \
+            -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g' \
+            -Dorg.gradle.daemon=false \
+            -Dorg.gradle.logging.level=info
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TERM: dumb  # 禁用交互式功能
+          CI: true    # 启用CI模式（部分插件会根据此变量调整行为）
+          # _JAVA_OPTIONS: "-Djava.io.tmpdir=${{ runner.temp }}/jpackage_temp"
+          # JPACKAGE_TEMP: "${{ runner.temp }}/jpackage_temp"
 
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-binaries
+          path: |
+            composeApp/build/compose/binaries/main-release/${{ matrix.artifact_glob }}
+          if-no-files-found: error
+
+  release:
+    name: Create Release
+    needs: build  # 等待所有构建作业完成
+    runs-on: ubuntu-latest
+    steps:
       - name: Get Version
-        id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-        if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: combined-artifacts
 
       - name: Create Release
-        id: create_release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: Release ${{ env.VERSION }}
-          draft: false
-          prerelease: false
+          tag_name: ${{ env.VERSION }}
+          name: "Release ${{ env.VERSION }}"
           files: |
-            composeApp/build/compose/binaries/main-release/**/${{ matrix.artifact_name }}
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.asset_name }}-artifacts
-          path: composeApp/build/compose/binaries/main-release/**/${{ matrix.artifact_name }}
-          if-no-files-found: error
+            combined-artifacts/**/*
