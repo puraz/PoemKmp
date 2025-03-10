@@ -3,10 +3,7 @@ package ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -63,6 +60,16 @@ fun NavigationDrawerContent(
             label = "收藏夹",
             selected = currentScreen is Screen.Favorites,
             onClick = { onScreenSelected(Screen.Favorites) }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 添加关于菜单项
+        NavigationItem(
+            icon = Icons.Default.Info,
+            label = "关于",
+            selected = currentScreen is Screen.About,
+            onClick = { onScreenSelected(Screen.About) }
         )
 
         Spacer(modifier = Modifier.weight(1f))

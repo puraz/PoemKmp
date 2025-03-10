@@ -13,6 +13,7 @@ import manager.AIModelManager
 import theme.ThemeManager
 import ui.components.NavigationDrawerContent
 import ui.navigation.Screen
+import ui.screens.AboutScreen
 import ui.screens.FavoritesScreen
 import ui.screens.HomeScreen
 import viewmodel.ViewModelFactory
@@ -55,11 +56,10 @@ fun MainScreen(viewModelFactory: ViewModelFactory, databaseManager: DatabaseMana
                     Screen.Favorites -> FavoritesScreen(
                         viewModelFactory = viewModelFactory
                     )
-                    // Screen.Categories -> CategoriesScreen()
-                    // Screen.Tags -> TagsScreen()
-                    // Screen.Settings -> SettingsScreen()
+                    Screen.About -> AboutScreen(
+                        viewModelFactory = viewModelFactory
+                    )
                     Screen.Categories -> TODO()
-                    Screen.Settings -> TODO()
                     Screen.Tags -> TODO()
                 }
             }
