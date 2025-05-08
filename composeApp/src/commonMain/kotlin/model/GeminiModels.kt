@@ -11,8 +11,8 @@ data class GeminiModels(
     data class ModelInfo(
         val name: String,
         val version: String? = null,
-        val displayName: String,
-        val description: String,
+        val displayName: String? = "",
+        val description: String? = "",
         val inputTokenLimit: Int? = null,
         val outputTokenLimit: Int? = null,
         @SerialName("supportedGenerationMethods")

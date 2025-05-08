@@ -211,17 +211,21 @@ fun AISettingsDialog(
                                                     .fillMaxWidth()
                                                     .padding(vertical = 4.dp)
                                             ) {
-                                                Text(
-                                                    text = model.displayName,
-                                                    style = MaterialTheme.typography.subtitle1
-                                                )
-                                                Text(
-                                                    text = model.description,
-                                                    style = MaterialTheme.typography.caption,
-                                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                                                    maxLines = 2,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
+                                                model.displayName?.let {
+                                                    Text(
+                                                        text = it,
+                                                        style = MaterialTheme.typography.subtitle1
+                                                    )
+                                                }
+                                                model.description?.let {
+                                                    Text(
+                                                        text = it,
+                                                        style = MaterialTheme.typography.caption,
+                                                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                                                        maxLines = 2,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                }
                                             }
                                         }
                                     }
