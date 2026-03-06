@@ -15,13 +15,13 @@ class AISearchViewModel(
     private val poemRepository: PoemRepository,
     private var aiService: AIService
 ) : BaseViewModel() {
+    private val configChangeListener: () -> Unit = {
+        aiService = AIServiceFactory.createService()
+    }
+
     init {
-        // 监听 AI 模型变化
-        AIModelManager.addModelChangeListener {
-            val currentModel = AIModelManager.currentModel.value
-            val aiService = AIServiceFactory.createService(currentModel)
-            this.aiService = aiService
-        }
+        // 监听 AI 配置变化
+        AIModelManager.addConfigChangeListener(configChangeListener)
     }
 
     private val _searchResults = mutableStateOf<List<AISearchResult>>(emptyList())
@@ -116,6 +116,6 @@ class AISearchViewModel(
 
     // 在 ViewModel 销毁时移除监听器
     override fun onCleared() {
-        AIModelManager.removeModelChangeListener { /* 对应的监听器逻辑 */ }
+        AIModelManager.removeConfigChangeListener(configChangeListener)
     }
-} 
+}

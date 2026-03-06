@@ -20,6 +20,7 @@ fun NavigationDrawerContent(
 ) {
     var showSearchDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
+    val aiConfig by AIModelManager.currentConfig.collectAsState()
     
     Column(
         modifier = modifier
@@ -85,7 +86,7 @@ fun NavigationDrawerContent(
         SettingsItem(
             icon = Icons.Default.Settings,
             title = "AI 设置",
-            value = AIModelManager.currentModel.value.displayName,
+            value = if (aiConfig.modelVersion.isNotBlank()) aiConfig.modelVersion else "未配置",
             onClick = { showSettingsDialog = true }
         )
     }

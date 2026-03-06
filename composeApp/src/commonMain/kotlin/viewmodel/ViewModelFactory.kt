@@ -2,7 +2,6 @@ package viewmodel
 
 import AIServiceFactory
 import data.PoemRepository
-import manager.AIModelManager
 
 class ViewModelFactory(
     private val repository: PoemRepository
@@ -11,11 +10,11 @@ class ViewModelFactory(
     fun createFavoritesViewModel(): FavoritesViewModel = FavoritesViewModel(repository)
     fun createSearchViewModel(): SearchViewModel = SearchViewModel(repository)
     fun createPoemAppreciationViewModel(): PoemAppreciationViewModel = PoemAppreciationViewModel(
-        aiService = AIServiceFactory.createService(AIModelManager.currentModel.value),
+        aiService = AIServiceFactory.createService(),
         poemRepository = repository
     )
     fun createAISearchViewModel(): AISearchViewModel = AISearchViewModel(
         poemRepository = repository,
-        aiService = AIServiceFactory.createService(AIModelManager.currentModel.value)
+        aiService = AIServiceFactory.createService()
     )
 }

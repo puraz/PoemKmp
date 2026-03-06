@@ -37,6 +37,16 @@ class OpenAIService(
     }
 
     @Serializable
+    private data class ModelsResponse(
+        val data: List<ModelInfo> = emptyList()
+    ) {
+        @Serializable
+        data class ModelInfo(
+            val id: String
+        )
+    }
+
+    @Serializable
     private data class ErrorResponse(
         val error: Error
     ) {
@@ -49,18 +59,45 @@ class OpenAIService(
         )
     }
 
+    // 获取可用模型列表（OpenAI 兼容接口：GET /models）
+    suspend fun getAvailableModels(): List<String> = withRetry {
+        try {
+            val response = client.get("$baseUrl/models") {
+                header("Authorization", "Bearer $apiKey")
+            }
+
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val modelsResponse = response.body<ModelsResponse>()
+                    modelsResponse.data.map { it.id }.distinct().sorted()
+                }
+                HttpStatusCode.Unauthorized ->
+                    throw AIServiceException.AuthenticationError("OpenAI API Key 无效")
+                HttpStatusCode.TooManyRequests ->
+                    throw AIServiceException.RateLimitError("OpenAI API 请求频率超限")
+                else -> {
+                    val errorBody = response.body<ErrorResponse>()
+                    throw AIServiceException.APIError(
+                        response.status.value,
+                        "OpenAI API 错误: ${errorBody.error.message}"
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            when (e) {
+                is AIServiceException -> throw e
+                else -> throw AIServiceException.NetworkError("获取模型列表失败: ${e.message}", e)
+            }
+        }
+    }
+
     override suspend fun semanticSearch(
         query: String,
         poems: List<Poem_entity>
     ): List<AISearchResult> = withRetry {
         try {
             val systemPrompt = createSystemPrompt(query)
-            val userPrompt = if (poems.isEmpty()) {
-                "基于搜索意图推荐古诗词，返回 JSON 数组格式，包含 title, content, author, dynasty, relevanceScore, matchReason 字段。"
-            } else {
-                "分析并排序以下诗词：\n" +
-                poems.joinToString("\n") { "${it.title} - ${it.author}：${it.content}" }
-            }
+            val userPrompt = createUserPrompt(query, poems)
 
             val response = client.post("$baseUrl/chat/completions") {
                 contentType(ContentType.Application.Json)
@@ -84,8 +121,9 @@ class OpenAIService(
                         throw AIServiceException.InvalidResponseError("响应未完全生成")
                     }
                     
-                    validateJsonResponse(content)
-                    val results = json.decodeFromString<List<AISearchResult>>(content)
+                    val cleaned = extractJsonFromResponse(content)
+                    val normalized = validateJsonResponse(cleaned)
+                    val results = json.decodeFromString<List<AISearchResult>>(normalized)
                     validateSearchResults(results)
                     results
                 }
@@ -140,8 +178,9 @@ class OpenAIService(
                     val content = chatResponse.choices.firstOrNull()?.message?.content
                         ?: throw AIServiceException.InvalidResponseError("响应内容为空")
                     
-                    validateJsonResponse(content)
-                    val analysis = json.decodeFromString<PoemAnalysis>(content)
+                    val cleaned = extractJsonFromResponse(content)
+                    val normalized = validateJsonResponse(cleaned, expectArray = false)
+                    val analysis = json.decodeFromString<PoemAnalysis>(normalized)
                     // validatePoemAnalysis(analysis)
                     analysis
                 }

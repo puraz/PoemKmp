@@ -6,109 +6,93 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import manager.AIModelManager
-import model.GeminiModels
-import service.DeepSeekAIService
-import service.GeminiAIService
+import service.OpenAIService
 
 @Composable
 fun AISettingsDialog(
     onDismiss: () -> Unit
 ) {
-    var selectedModel by remember { mutableStateOf(AIModelManager.currentModel.value) }
-    var modelConfig by remember { 
-        mutableStateOf(AIModelManager.getModelConfig(selectedModel))
-    }
-    var availableVersions by remember { mutableStateOf<List<String>>(emptyList()) }
-    var geminiModels by remember { mutableStateOf<List<GeminiModels.ModelInfo>>(emptyList()) }
-    var isLoadingVersions by remember { mutableStateOf(false) }
+    // 当前配置（OpenAI 兼容）
+    var modelConfig by remember { mutableStateOf(AIModelManager.getConfig()) }
+    // 可用模型列表
+    var availableModels by remember { mutableStateOf<List<String>>(emptyList()) }
+    // 是否正在加载模型列表
+    var isLoadingModels by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
 
-    // 创建一个协程作用域
-    val scope = rememberCoroutineScope()
+    // 加载可用的模型列表
+    LaunchedEffect(modelConfig.apiKey, modelConfig.baseUrl) {
+        if (modelConfig.apiKey.isBlank() || modelConfig.baseUrl.isBlank()) {
+            availableModels = emptyList()
+            return@LaunchedEffect
+        }
 
-    // 加载可用的模型版本
-    LaunchedEffect(selectedModel, modelConfig.apiKey) {
-        if (modelConfig.apiKey.isNotBlank()) {
-            isLoadingVersions = true
-            try {
-                scope.launch {
-                    when (selectedModel) {
-                        AIModelManager.AIModel.DEEPSEEK -> {
-                            val service = DeepSeekAIService(
-                                apiKey = modelConfig.apiKey,
-                                baseUrl = modelConfig.baseUrl,
-                                modelVersion = modelConfig.modelVersion
-                            )
-                            availableVersions = service.getAvailableModels()
-                            if (modelConfig.modelVersion !in availableVersions && availableVersions.isNotEmpty()) {
-                                modelConfig = modelConfig.copy(modelVersion = availableVersions.first())
-                            }
-                        }
-
-                        AIModelManager.AIModel.GEMINI -> {
-                            val service = GeminiAIService(
-                                apiKey = modelConfig.apiKey,
-                                baseUrl = modelConfig.baseUrl,
-                                modelVersion = modelConfig.modelVersion
-                            )
-                            geminiModels = service.getAvailableModels()
-                            val modelNames = geminiModels.map { it.name.removePrefix("models/") }
-                            if (modelConfig.modelVersion !in modelNames && modelNames.isNotEmpty()) {
-                                modelConfig = modelConfig.copy(modelVersion = modelNames.first())
-                            }
-                        }
+        // 切换配置时先清空旧列表，避免误选
+        availableModels = emptyList()
+        expanded = false
+        isLoadingModels = true
+        try {
+            val service = OpenAIService(
+                apiKey = modelConfig.apiKey,
+                baseUrl = modelConfig.baseUrl,
+                model = modelConfig.modelVersion
+            )
+            // 过滤非文本类模型
+            val filteredKeywords = listOf(
+                "embedding",
+                "whisper",
+                "tts",
+                "moderation",
+                "image",
+                "audio",
+                "vision",
+                "realtime"
+            )
+            availableModels = service.getAvailableModels()
+                .filterNot { model ->
+                    filteredKeywords.any { keyword ->
+                        model.contains(keyword, ignoreCase = true)
                     }
                 }
-            } catch (e: Exception) {
-                println("加载模型版本失败: ${e.message}")
-            } finally {
-                isLoadingVersions = false
+            if (modelConfig.modelVersion !in availableModels && availableModels.isNotEmpty()) {
+                modelConfig = modelConfig.copy(modelVersion = availableModels.first())
             }
+        } catch (e: Exception) {
+            println("加载模型列表失败: ${e.message}")
+        } finally {
+            isLoadingModels = false
         }
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("AI 模型设置") },
+        title = { Text("AI 设置") },
         text = {
             Column(
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
-                // 模型选择
+                // 模式提示
                 Text(
-                    text = "选择 AI 模型",
+                    text = "OpenAI 兼容模式",
                     style = MaterialTheme.typography.subtitle1
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                AIModelManager.AIModel.values().forEach { model ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = selectedModel == model,
-                            onClick = {
-                                selectedModel = model
-                                modelConfig = AIModelManager.getModelConfig(model)
-                            }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(model.displayName)
-                    }
-                }
-                
+                // Base URL 输入
+                OutlinedTextField(
+                    value = modelConfig.baseUrl,
+                    onValueChange = { modelConfig = modelConfig.copy(baseUrl = it) },
+                    label = { Text("Base URL") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // API Key 输入
                 OutlinedTextField(
                     value = modelConfig.apiKey,
@@ -120,39 +104,25 @@ fun AISettingsDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Base URL 输入
-                OutlinedTextField(
-                    value = modelConfig.baseUrl,
-                    onValueChange = { modelConfig = modelConfig.copy(baseUrl = it) },
-                    label = { Text("API 基础链接") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 // 模型版本选择
                 Box(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     OutlinedTextField(
-                        value = when (selectedModel) {
-                            AIModelManager.AIModel.DEEPSEEK -> modelConfig.modelVersion
-                            AIModelManager.AIModel.GEMINI -> {
-                                geminiModels.find { it.name.removePrefix("models/") == modelConfig.modelVersion }
-                                    ?.displayName ?: modelConfig.modelVersion
-                            }
-                        },
-                        onValueChange = { },
+                        value = modelConfig.modelVersion,
+                        onValueChange = { modelConfig = modelConfig.copy(modelVersion = it) },
                         label = { Text("模型版本") },
                         modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
+                        // 支持手动输入 + 下拉选择
+                        readOnly = false,
                         trailingIcon = {
-                            IconButton(onClick = { expanded = true }) {
-                                Icon(
-                                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                    contentDescription = "选择模型版本"
-                                )
+                            if (availableModels.isNotEmpty()) {
+                                IconButton(onClick = { expanded = true }) {
+                                    Icon(
+                                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                        contentDescription = "选择模型版本"
+                                    )
+                                }
                             }
                         }
                     )
@@ -164,7 +134,7 @@ fun AISettingsDialog(
                             .widthIn(max = 300.dp)
                             .heightIn(max = 300.dp)
                     ) {
-                        if (isLoadingVersions) {
+                        if (isLoadingModels) {
                             DropdownMenuItem(
                                 onClick = { },
                                 enabled = false
@@ -179,83 +149,33 @@ fun AISettingsDialog(
                                 }
                             }
                         } else {
-                            when (selectedModel) {
-                                AIModelManager.AIModel.DEEPSEEK -> {
-                                    availableVersions.forEach { version ->
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                modelConfig = modelConfig.copy(modelVersion = version)
-                                                expanded = false
-                                            }
-                                        ) {
-                                            Text(
-                                                text = version,
-                                                modifier = Modifier.fillMaxWidth()
-                                            )
-                                        }
+                            availableModels.forEach { model ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        modelConfig = modelConfig.copy(modelVersion = model)
+                                        expanded = false
                                     }
-                                }
-
-                                AIModelManager.AIModel.GEMINI -> {
-                                    geminiModels.asReversed().forEach { model ->
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                modelConfig = modelConfig.copy(
-                                                    modelVersion = model.name.removePrefix("models/")
-                                                )
-                                                expanded = false
-                                            }
-                                        ) {
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(vertical = 4.dp)
-                                            ) {
-                                                model.displayName?.let {
-                                                    Text(
-                                                        text = it,
-                                                        style = MaterialTheme.typography.subtitle1
-                                                    )
-                                                }
-                                                model.description?.let {
-                                                    Text(
-                                                        text = it,
-                                                        style = MaterialTheme.typography.caption,
-                                                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                                                        maxLines = 2,
-                                                        overflow = TextOverflow.Ellipsis
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
+                                ) {
+                                    Text(
+                                        text = model,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
                                 }
                             }
                         }
                     }
                 }
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // API Key 说明
-                Text(
-                    text = when (selectedModel) {
-                        AIModelManager.AIModel.DEEPSEEK -> "DeepSeek API Key 获取方式：访问 https://platform.deepseek.com"
-                        AIModelManager.AIModel.GEMINI -> "Gemini API Key 获取方式：访问 https://ai.google.dev"
-                    },
-                    style = MaterialTheme.typography.caption,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                )
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    AIModelManager.saveModelConfig(selectedModel, modelConfig)
-                    AIModelManager.setModel(selectedModel)
+                    AIModelManager.setConfig(modelConfig)
                     onDismiss()
                 },
-                enabled = modelConfig.apiKey.isNotBlank()
+                enabled = modelConfig.apiKey.isNotBlank() &&
+                    modelConfig.baseUrl.isNotBlank() &&
+                    modelConfig.modelVersion.isNotBlank()
             ) {
                 Text("确定")
             }

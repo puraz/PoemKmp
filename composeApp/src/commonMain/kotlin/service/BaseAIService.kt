@@ -97,6 +97,23 @@ abstract class BaseAIService {
             throw AIServiceException.ResponseParsingError("JSON解析失败", e)
         }
     }
+
+    protected fun extractJsonFromResponse(content: String): String {
+        val withoutThink = content.replace(Regex("(?s)<think>.*?</think>"), "")
+        val withoutFences = withoutThink
+            .replace(Regex("```(?:json)?"), "")
+            .replace("```", "")
+        val trimmed = withoutFences.trim()
+
+        val firstObj = trimmed.indexOf('{')
+        val firstArr = trimmed.indexOf('[')
+        val first = listOf(firstObj, firstArr).filter { it >= 0 }.minOrNull() ?: return trimmed
+        val lastObj = trimmed.lastIndexOf('}')
+        val lastArr = trimmed.lastIndexOf(']')
+        val last = maxOf(lastObj, lastArr)
+
+        return if (last > first) trimmed.substring(first, last + 1) else trimmed
+    }
     
     protected fun createSystemPrompt(query: String) = """
                 你是一个专业的古诗词检索助手。用户可能会提供：

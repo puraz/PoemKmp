@@ -7,7 +7,7 @@
 
 ## ✨ 功能特性
 
-- **智能诗词发现**：基于DeepSeek、Gemini AI 根据描述推荐相关诗词
+- **智能诗词发现**：基于 OpenAI 兼容 AI 根据描述推荐相关诗词
 - **综合收藏管理**：创建、编辑、删除和管理个人诗词库
 - **AI 智能赏析**：利用人工智能生成诗词解析与鉴赏
 - **高级搜索**：快速定位系统中的诗词作品
@@ -28,7 +28,7 @@
 ### 环境要求
 
 - Java 运行环境（JRE）17 或更高版本（开发要求，普通使用则不用）
-- DeepSeek API 或 Google Gemini API 密钥（用于 AI 功能）
+- OpenAI 兼容服务 API 密钥（用于 AI 功能）
 
 ### 安装步骤
 
@@ -48,7 +48,7 @@
 
 1. 启动应用程序
 2. 进入左侧边栏的 AI 设置
-3. 输入您的 DeepSeek API 密钥
+3. 输入您的 OpenAI 兼容 API Key
 4. 开始探索和收藏诗词！
 
 ## 🛠️ 技术栈
@@ -58,7 +58,7 @@
 - **网络请求**：Ktor 客户端
 - **配置管理**：Multiplatform Settings
 - **序列化**：Kotlinx Serialization
-- **AI 集成**：DeepSeek API / Google Gemini API
+- **AI 集成**：OpenAI 兼容 API
 
 ## 🗂️ 项目结构
 
